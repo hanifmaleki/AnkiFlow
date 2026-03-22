@@ -26,11 +26,11 @@ Main documents:
 
 ## Current Status
 
-The project is currently in the planning stage.
+The project is in Phase 1 bootstrap.
 
 The next implementation step is:
 
-- Initialize the Nuxt 3 project
+- Make the home page show a simple title: `AnkiFlow`
 
 ## Goals
 
