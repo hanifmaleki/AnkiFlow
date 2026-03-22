@@ -26,7 +26,7 @@ Build a Nuxt app that lets you:
 
 ## Current Phase
 
-Phase 0: Planning
+Phase 1: Bootstrap the App
 
 ## Progress Legend
 
@@ -42,7 +42,7 @@ Phase 0: Planning
 ### 0.1 Define the first version
 
 - [x] Decide the project goal.
-- [x] Choose the main stack: Nuxt 3 + TypeScript.
+- [x] Choose the main stack: Nuxt + TypeScript.
 - [x] Decide the main user flow: enter word -> review generated result -> confirm -> add to Anki.
 - [ ] Decide the initial language pair for cards.
 - [ ] Decide the Anki deck name for development.
@@ -51,7 +51,7 @@ Phase 0: Planning
 ### 0.2 Create the project board
 
 - [x] Add this Markdown planning file.
-- [ ] Keep this file updated as tasks are completed.
+- [x] Keep this file updated as tasks are completed.
 
 ---
 
@@ -59,10 +59,10 @@ Phase 0: Planning
 
 Goal: get a minimal Nuxt app running locally.
 
-- [ ] Initialize a new Nuxt 3 project.
-- [ ] Install dependencies.
-- [ ] Start the dev server.
-- [ ] Verify the default Nuxt page opens in the browser.
+- [x] Initialize a new Nuxt project.
+- [x] Install dependencies.
+- [x] Start the dev server.
+- [x] Verify the default Nuxt page opens in the browser.
 - [ ] Make the home page show a simple title: `AnkiFlow`.
 - [ ] Commit or checkpoint the state if desired.
 
@@ -250,7 +250,7 @@ Only after the core flow works.
 
 The next step should be:
 
-- [ ] Initialize the Nuxt 3 project.
+- [ ] Make the home page show a simple title: `AnkiFlow`.
 
 ---
 
@@ -259,6 +259,7 @@ The next step should be:
 - [x] Use Vue/Nuxt because learning Vue/Nuxt is a secondary project goal.
 - [x] Keep backend logic inside Nuxt server routes.
 - [x] Start with a review-before-add flow.
+- [x] Continue with the generated Nuxt 4 starter.
 - [ ] Choose the initial target language.
 - [ ] Choose the Anki deck and note model for development.
 

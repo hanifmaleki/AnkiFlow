@@ -6,8 +6,13 @@ This file records important technical and product choices.
 
 ### Framework
 
-- Decision: Use Nuxt 3 with TypeScript.
+- Decision: Use Nuxt with TypeScript.
 - Reason: The project supports learning Vue/Nuxt and still provides frontend and backend in one app.
+
+### Nuxt Version
+
+- Decision: Continue with the generated Nuxt 4 starter.
+- Reason: The project was bootstrapped successfully with Nuxt 4 and it fits the learning goals and planned architecture.
 
 ### Backend Style
 
