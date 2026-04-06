@@ -23,6 +23,15 @@
           </button>
         </div>
       </section>
+
+      <section class="preview-panel" aria-label="Card preview">
+        <p class="preview-eyebrow">Generated card</p>
+        <h2 class="preview-title">No generated card yet</h2>
+        <p class="preview-copy">
+          Enter a word and click Generate to preview the card before adding it
+          to Anki.
+        </p>
+      </section>
     </div>
   </main>
 </template>
@@ -106,6 +115,35 @@
   &:hover {
     background: #1f2937;
   }
+}
+
+.preview-panel {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 1.25rem;
+  background: #f9fafb;
+}
+
+.preview-eyebrow {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.preview-title {
+  margin: 0.5rem 0 0;
+  font-size: 1.5rem;
+  color: #111827;
+}
+
+.preview-copy {
+  margin: 0.75rem 0 0;
+  line-height: 1.7;
+  color: #4b5563;
 }
 
 @media (max-width: 640px) {
