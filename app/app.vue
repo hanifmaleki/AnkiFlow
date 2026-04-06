@@ -31,6 +31,9 @@
           Enter a word and click Generate to preview the card before adding it
           to Anki.
         </p>
+        <button class="preview-action" type="button" disabled>
+          Add to Anki
+        </button>
       </section>
     </div>
   </main>
@@ -144,6 +147,17 @@
   margin: 0.75rem 0 0;
   line-height: 1.7;
   color: #4b5563;
+}
+
+.preview-action {
+  margin-top: 1.25rem;
+  padding: 0.9rem 1.2rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.9rem;
+  background: #e5e7eb;
+  color: #6b7280;
+  font: inherit;
+  cursor: not-allowed;
 }
 
 @media (max-width: 640px) {
