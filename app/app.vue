@@ -1,6 +1,6 @@
 <template>
-  <div>
+  <main>
     <NuxtRouteAnnouncer />
-    <NuxtWelcome />
-  </div>
+    <h1>AnkiFlow</h1>
+  </main>
 </template>
