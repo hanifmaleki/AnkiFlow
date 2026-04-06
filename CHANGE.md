@@ -2,6 +2,17 @@
 
 This file records meaningful project changes as the work progresses.
 
+## 2026-04-06
+
+### Phase 2 homepage shell
+
+- Replaced the Nuxt starter page with a simple AnkiFlow homepage
+- Added a centered hero section with title and short description
+- Added a word input field and `Generate` button
+- Added a generated-card placeholder panel
+- Added a disabled `Add to Anki` button to reflect the future workflow
+- Switched component styling to SCSS and installed `sass`
+
 ## 2026-03-22
 
 ### Project setup
