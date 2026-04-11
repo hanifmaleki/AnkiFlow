@@ -26,11 +26,11 @@ Main documents:
 
 ## Current Status
 
-The project has completed Phase 2 of the initial UI work.
+The project has completed Phase 3 of the initial UI work.
 
 The next implementation step is:
 
-- Create a local mock object for generated card data
+- Create `server/api/generate.post.ts`
 
 ## Goals
 

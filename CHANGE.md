@@ -2,6 +2,15 @@
 
 This file records meaningful project changes as the work progresses.
 
+## 2026-04-11
+
+### Phase 3 static card preview
+
+- Added local mock card data generation on the homepage
+- Made the generated-card preview appear only after clicking `Generate`
+- Replaced the placeholder preview with editable fields for word, meaning, example sentence, translation hint, and tags
+- Kept the `Add to Anki` action disabled while the backend flow is still pending
+
 ## 2026-04-06
 
 ### Phase 2 homepage shell
