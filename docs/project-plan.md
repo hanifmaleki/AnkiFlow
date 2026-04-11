@@ -26,7 +26,7 @@ Build a Nuxt app that lets you:
 
 ## Current Phase
 
-Phase 1: Bootstrap the App
+Phase 3: Static Card Preview
 
 ## Progress Legend
 
@@ -63,8 +63,8 @@ Goal: get a minimal Nuxt app running locally.
 - [x] Install dependencies.
 - [x] Start the dev server.
 - [x] Verify the default Nuxt page opens in the browser.
-- [ ] Make the home page show a simple title: `AnkiFlow`.
-- [ ] Commit or checkpoint the state if desired.
+- [x] Make the home page show a simple title: `AnkiFlow`.
+- [x] Commit or checkpoint the state if desired.
 
 ## Definition of done
 
@@ -77,12 +77,12 @@ Goal: get a minimal Nuxt app running locally.
 
 Goal: create a minimal UI shell for the project.
 
-- [ ] Create a simple page layout.
-- [ ] Add a text input for a word.
-- [ ] Add a `Generate` button.
-- [ ] Add a placeholder area for generated content.
-- [ ] Add a placeholder `Add to Anki` button in disabled state.
-- [ ] Keep the page intentionally simple.
+- [x] Create a simple page layout.
+- [x] Add a text input for a word.
+- [x] Add a `Generate` button.
+- [x] Add a placeholder area for generated content.
+- [x] Add a placeholder `Add to Anki` button in disabled state.
+- [x] Keep the page intentionally simple.
 
 ## Definition of done
 
@@ -250,7 +250,7 @@ Only after the core flow works.
 
 The next step should be:
 
-- [ ] Make the home page show a simple title: `AnkiFlow`.
+- [ ] Create a local mock object for generated card data.
 
 ---
 

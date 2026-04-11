@@ -26,11 +26,11 @@ Main documents:
 
 ## Current Status
 
-The project is in Phase 1 bootstrap.
+The project has completed Phase 2 of the initial UI work.
 
 The next implementation step is:
 
-- Make the home page show a simple title: `AnkiFlow`
+- Create a local mock object for generated card data
 
 ## Goals
 
