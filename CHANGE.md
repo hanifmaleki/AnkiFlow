@@ -4,6 +4,12 @@ This file records meaningful project changes as the work progresses.
 
 ## 2026-04-11
 
+### Phase 4 generate API route
+
+- Added `server/api/generate.post.ts` to return mocked card data from a Nuxt server route
+- Updated the homepage to call the generate API instead of creating mock data only on the frontend
+- Added a loading state to the `Generate` button and a basic error message for failed requests
+
 ### Phase 3 static card preview
 
 - Added local mock card data generation on the homepage
