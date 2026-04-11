@@ -26,7 +26,7 @@ Build a Nuxt app that lets you:
 
 ## Current Phase
 
-Phase 3: Static Card Preview
+Phase 4: First Nuxt Server API Route
 
 ## Progress Legend
 
@@ -95,16 +95,16 @@ Goal: create a minimal UI shell for the project.
 
 Goal: learn the UI flow before adding any backend logic.
 
-- [ ] Create a local mock object for generated card data.
-- [ ] Show fields like:
+- [x] Create a local mock object for generated card data.
+- [x] Show fields like:
   - Word
   - Meaning
   - Example sentence
   - Translation or native-language hint
   - Tags
-- [ ] Render the mock data in a card preview.
-- [ ] Enable the review area only after clicking `Generate`.
-- [ ] Make the preview fields editable in the UI.
+- [x] Render the mock data in a card preview.
+- [x] Enable the review area only after clicking `Generate`.
+- [x] Make the preview fields editable in the UI.
 
 ## Definition of done
 
@@ -250,7 +250,7 @@ Only after the core flow works.
 
 The next step should be:
 
-- [ ] Create a local mock object for generated card data.
+- [ ] Create `server/api/generate.post.ts`.
 
 ---
 

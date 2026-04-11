@@ -1,3 +1,32 @@
+<script setup lang="ts">
+type CardPreview = {
+  word: string
+  meaning: string
+  exampleSentence: string
+  translationHint: string
+  tags: string
+}
+
+const word = ref('')
+const previewCard = ref<CardPreview | null>(null)
+
+function createMockCard(inputWord: string): CardPreview {
+  const cleanWord = inputWord.trim() || 'serendipity'
+
+  return {
+    word: cleanWord,
+    meaning: 'A pleasant surprise or a lucky discovery.',
+    exampleSentence: `Finding the perfect example for "${cleanWord}" felt like pure serendipity.`,
+    translationHint: 'Lucky accident; pleasant surprise.',
+    tags: 'vocabulary, everyday-english, review'
+  }
+}
+
+function generatePreview() {
+  previewCard.value = createMockCard(word.value)
+}
+</script>
+
 <template>
   <main class="page">
     <NuxtRouteAnnouncer />
@@ -14,26 +43,88 @@
         <div class="input-row">
           <input
             id="word"
+            v-model="word"
             class="word-input"
             type="text"
             placeholder="Enter a word"
           >
-          <button class="generate-button" type="button">
+          <button class="generate-button" type="button" @click="generatePreview">
             Generate
           </button>
         </div>
       </section>
 
       <section class="preview-panel" aria-label="Card preview">
-        <p class="preview-eyebrow">Generated card</p>
-        <h2 class="preview-title">No generated card yet</h2>
-        <p class="preview-copy">
-          Enter a word and click Generate to preview the card before adding it
-          to Anki.
-        </p>
-        <button class="preview-action" type="button" disabled>
-          Add to Anki
-        </button>
+        <template v-if="previewCard">
+          <p class="preview-eyebrow">Generated card</p>
+          <h2 class="preview-title">Review and edit the preview</h2>
+          <p class="preview-copy">
+            This is still mock data for now, but the review flow is live.
+          </p>
+
+          <div class="card-form">
+            <label class="field">
+              <span class="field-label">Word</span>
+              <input
+                v-model="previewCard.word"
+                class="field-input"
+                type="text"
+              >
+            </label>
+
+            <label class="field">
+              <span class="field-label">Meaning</span>
+              <textarea
+                v-model="previewCard.meaning"
+                class="field-input field-textarea"
+                rows="3"
+              />
+            </label>
+
+            <label class="field">
+              <span class="field-label">Example sentence</span>
+              <textarea
+                v-model="previewCard.exampleSentence"
+                class="field-input field-textarea"
+                rows="4"
+              />
+            </label>
+
+            <label class="field">
+              <span class="field-label">Translation hint</span>
+              <textarea
+                v-model="previewCard.translationHint"
+                class="field-input field-textarea"
+                rows="3"
+              />
+            </label>
+
+            <label class="field">
+              <span class="field-label">Tags</span>
+              <input
+                v-model="previewCard.tags"
+                class="field-input"
+                type="text"
+              >
+            </label>
+          </div>
+
+          <button class="preview-action" type="button" disabled>
+            Add to Anki
+          </button>
+        </template>
+
+        <template v-else>
+          <p class="preview-eyebrow">Generated card</p>
+          <h2 class="preview-title">No generated card yet</h2>
+          <p class="preview-copy">
+            Enter a word and click Generate to preview the card before adding it
+            to Anki.
+          </p>
+          <button class="preview-action" type="button" disabled>
+            Add to Anki
+          </button>
+        </template>
       </section>
     </div>
   </main>
@@ -72,12 +163,16 @@
   margin-top: 2.5rem;
 }
 
-.input-label {
+.input-label,
+.field-label {
   display: block;
-  margin-bottom: 0.75rem;
   font-size: 0.95rem;
   font-weight: 600;
   color: #111827;
+}
+
+.input-label {
+  margin-bottom: 0.75rem;
 }
 
 .input-row {
@@ -87,13 +182,15 @@
 }
 
 .word-input,
-.generate-button {
+.generate-button,
+.field-input {
   border-radius: 0.9rem;
   border: 1px solid #d1d5db;
   font: inherit;
 }
 
-.word-input {
+.word-input,
+.field-input {
   width: 100%;
   padding: 0.95rem 1rem;
   background: #fff;
@@ -147,6 +244,22 @@
   margin: 0.75rem 0 0;
   line-height: 1.7;
   color: #4b5563;
+}
+
+.card-form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.field-textarea {
+  min-height: 7rem;
+  resize: vertical;
 }
 
 .preview-action {
