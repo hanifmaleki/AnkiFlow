@@ -26,11 +26,11 @@ Main documents:
 
 ## Current Status
 
-The project has completed Phase 4 of the initial UI and API work.
+The project is in Phase 5: AnkiConnect spike.
 
 The next implementation step is:
 
-- Read the AnkiConnect endpoint and required actions
+- Run Anki locally and verify the app can reach AnkiConnect
 
 ## Goals
 
