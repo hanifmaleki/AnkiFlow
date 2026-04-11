@@ -9,21 +9,26 @@ type CardPreview = {
 
 const word = ref('')
 const previewCard = ref<CardPreview | null>(null)
+const isGenerating = ref(false)
+const generateError = ref('')
 
-function createMockCard(inputWord: string): CardPreview {
-  const cleanWord = inputWord.trim() || 'serendipity'
+async function generatePreview() {
+  isGenerating.value = true
+  generateError.value = ''
 
-  return {
-    word: cleanWord,
-    meaning: 'A pleasant surprise or a lucky discovery.',
-    exampleSentence: `Finding the perfect example for "${cleanWord}" felt like pure serendipity.`,
-    translationHint: 'Lucky accident; pleasant surprise.',
-    tags: 'vocabulary, everyday-english, review'
+  try {
+    previewCard.value = await $fetch<CardPreview>('/api/generate', {
+      method: 'POST',
+      body: {
+        word: word.value
+      }
+    })
+  } catch {
+    previewCard.value = null
+    generateError.value = 'Could not generate a preview. Please try again.'
+  } finally {
+    isGenerating.value = false
   }
-}
-
-function generatePreview() {
-  previewCard.value = createMockCard(word.value)
 }
 </script>
 
@@ -48,10 +53,18 @@ function generatePreview() {
             type="text"
             placeholder="Enter a word"
           >
-          <button class="generate-button" type="button" @click="generatePreview">
-            Generate
+          <button
+            class="generate-button"
+            type="button"
+            :disabled="isGenerating"
+            @click="generatePreview"
+          >
+            {{ isGenerating ? 'Generating...' : 'Generate' }}
           </button>
         </div>
+        <p v-if="generateError" class="error-message" role="alert">
+          {{ generateError }}
+        </p>
       </section>
 
       <section class="preview-panel" aria-label="Card preview">
@@ -215,6 +228,16 @@ function generatePreview() {
   &:hover {
     background: #1f2937;
   }
+
+  &:disabled {
+    background: #9ca3af;
+    cursor: wait;
+  }
+}
+
+.error-message {
+  margin: 0.75rem 0 0;
+  color: #b91c1c;
 }
 
 .preview-panel {

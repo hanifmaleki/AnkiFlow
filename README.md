@@ -26,11 +26,11 @@ Main documents:
 
 ## Current Status
 
-The project has completed Phase 3 of the initial UI work.
+The project has completed Phase 4 of the initial UI and API work.
 
 The next implementation step is:
 
-- Create `server/api/generate.post.ts`
+- Read the AnkiConnect endpoint and required actions
 
 ## Goals
 

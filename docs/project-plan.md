@@ -26,7 +26,7 @@ Build a Nuxt app that lets you:
 
 ## Current Phase
 
-Phase 4: First Nuxt Server API Route
+Phase 5: AnkiConnect Spike
 
 ## Progress Legend
 
@@ -117,13 +117,13 @@ Goal: learn the UI flow before adding any backend logic.
 
 Goal: introduce the idea of backend inside Nuxt in the smallest possible way.
 
-- [ ] Create `server/api/generate.post.ts`.
-- [ ] Accept a word from the frontend.
-- [ ] Return mocked JSON instead of calling an LLM.
-- [ ] Connect the page to this API route.
-- [ ] Replace frontend-only mock data with API response data.
-- [ ] Show a loading state while waiting for the response.
-- [ ] Show a basic error message if the request fails.
+- [x] Create `server/api/generate.post.ts`.
+- [x] Accept a word from the frontend.
+- [x] Return mocked JSON instead of calling an LLM.
+- [x] Connect the page to this API route.
+- [x] Replace frontend-only mock data with API response data.
+- [x] Show a loading state while waiting for the response.
+- [x] Show a basic error message if the request fails.
 
 ## Definition of done
 
@@ -250,7 +250,7 @@ Only after the core flow works.
 
 The next step should be:
 
-- [ ] Create `server/api/generate.post.ts`.
+- [ ] Read the AnkiConnect endpoint and required actions.
 
 ---
 
