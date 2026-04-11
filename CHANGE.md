@@ -4,6 +4,13 @@ This file records meaningful project changes as the work progresses.
 
 ## 2026-04-11
 
+### Phase 5 AnkiConnect spike
+
+- Added `server/utils/anki.ts` with a small helper for calling AnkiConnect actions
+- Added `server/api/anki-test.get.ts` to return safe connectivity data from AnkiConnect
+- Confirmed the app builds with the new AnkiConnect server route
+- Local connectivity to `127.0.0.1:8765` is still pending because no AnkiConnect server was running during verification
+
 ### Phase 4 generate API route
 
 - Added `server/api/generate.post.ts` to return mocked card data from a Nuxt server route

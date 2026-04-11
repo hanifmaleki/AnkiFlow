@@ -136,11 +136,11 @@ Goal: introduce the idea of backend inside Nuxt in the smallest possible way.
 
 Goal: prove that the app can talk to Anki.
 
-- [ ] Read the AnkiConnect endpoint and required actions.
-- [ ] Create `server/utils/anki.ts`.
-- [ ] Add a function to call AnkiConnect.
-- [ ] Add a test route such as `server/api/anki-test.get.ts`.
-- [ ] Return a safe response like version info or deck list.
+- [x] Read the AnkiConnect endpoint and required actions.
+- [x] Create `server/utils/anki.ts`.
+- [x] Add a function to call AnkiConnect.
+- [x] Add a test route such as `server/api/anki-test.get.ts`.
+- [x] Return a safe response like version info or deck list.
 - [ ] Run Anki locally and verify the app can reach AnkiConnect.
 
 ## Definition of done
