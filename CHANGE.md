@@ -4,6 +4,13 @@ This file records meaningful project changes as the work progresses.
 
 ## 2026-04-11
 
+### Phase 6 hardcoded add-to-Anki
+
+- Added `server/api/add-to-anki.post.ts` to create a hardcoded note through AnkiConnect
+- Extended `server/utils/anki.ts` with `addNote` support
+- Wired the homepage `Add to Anki` button to call the new route after generating a preview
+- Added loading, success, and error feedback for the add-to-Anki action
+
 ### Phase 5 AnkiConnect spike
 
 - Added `server/utils/anki.ts` with a small helper for calling AnkiConnect actions

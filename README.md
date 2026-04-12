@@ -26,11 +26,11 @@ Main documents:
 
 ## Current Status
 
-The project is in Phase 5: AnkiConnect spike.
+The project is in Phase 6: hardcoded note creation.
 
 The next implementation step is:
 
-- Run Anki locally and verify the app can reach AnkiConnect
+- Verify the hardcoded note appears in Anki after clicking `Add to Anki`
 
 ## Goals
 

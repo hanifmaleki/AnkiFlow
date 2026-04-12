@@ -1,7 +1,7 @@
 const ANKI_CONNECT_URL = 'http://127.0.0.1:8765'
 const ANKI_CONNECT_VERSION = 5
 
-type AnkiConnectAction = 'version' | 'deckNames'
+type AnkiConnectAction = 'version' | 'deckNames' | 'addNote'
 
 type AnkiConnectRequest<TParams> = {
   action: AnkiConnectAction
@@ -12,6 +12,13 @@ type AnkiConnectRequest<TParams> = {
 type AnkiConnectResponse<TResult> = {
   result: TResult | null
   error: string | null
+}
+
+export type AnkiNote = {
+  deckName: string
+  modelName: string
+  fields: Record<string, string>
+  tags?: string[]
 }
 
 export async function callAnkiConnect<TResult, TParams = undefined>(
@@ -50,4 +57,8 @@ export async function callAnkiConnect<TResult, TParams = undefined>(
   }
 
   return data.result
+}
+
+export async function addNote(note: AnkiNote): Promise<number> {
+  return callAnkiConnect<number, { note: AnkiNote }>('addNote', { note })
 }
