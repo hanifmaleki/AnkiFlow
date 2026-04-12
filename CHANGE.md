@@ -2,6 +2,15 @@
 
 This file records meaningful project changes as the work progresses.
 
+## 2026-04-12
+
+### Phase 7 reviewed preview data to Anki
+
+- Replaced the hardcoded add-to-Anki payload with the current reviewed preview data
+- Mapped the preview fields into Anki's `Basic` note fields using the editable word and a composed back field
+- Added request validation so empty preview fields fail with a clear error
+- Updated the add-to-Anki success message to confirm the reviewed word that was sent
+
 ## 2026-04-11
 
 ### Phase 6 hardcoded add-to-Anki

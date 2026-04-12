@@ -26,11 +26,11 @@ Main documents:
 
 ## Current Status
 
-The project is in Phase 6: hardcoded note creation.
+The project has completed Phase 7 of the review-to-Anki flow.
 
 The next implementation step is:
 
-- Verify the hardcoded note appears in Anki after clicking `Add to Anki`
+- Choose the LLM provider and replace mocked generation with real model output
 
 ## Goals
 

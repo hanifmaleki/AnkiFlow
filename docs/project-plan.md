@@ -26,7 +26,7 @@ Build a Nuxt app that lets you:
 
 ## Current Phase
 
-Phase 5: AnkiConnect Spike
+Phase 8: Real LLM Generation
 
 ## Progress Legend
 
@@ -164,17 +164,15 @@ Goal: make the smallest successful card creation.
 
 - A note created from the app appears in Anki.
 
----
-
 ## Phase 7: Send Reviewed UI Data to Anki
 
 Goal: connect the editable preview to real card creation.
 
-- [ ] Replace hardcoded note data with the edited preview data.
-- [ ] Map UI fields to Anki note fields.
-- [ ] Add basic payload validation.
-- [ ] Disable submit while request is in progress.
-- [ ] Show a clear success message after adding the note.
+- [x] Replace hardcoded note data with the edited preview data.
+- [x] Map UI fields to Anki note fields.
+- [x] Add basic payload validation.
+- [x] Disable submit while request is in progress.
+- [x] Show a clear success message after adding the note.
 
 ## Definition of done
 
@@ -250,7 +248,7 @@ Only after the core flow works.
 
 The next step should be:
 
-- [ ] Read the AnkiConnect endpoint and required actions.
+- [ ] Choose the LLM provider.
 
 ---
 
