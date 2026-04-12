@@ -77,17 +77,24 @@ async function testAnkiConnection() {
 }
 
 async function addHardcodedNoteToAnki() {
+  if (!previewCard.value) {
+    addToAnkiTone.value = 'error'
+    addToAnkiStatus.value = 'Generate a card before adding it to Anki.'
+    return
+  }
+
   isAddingToAnki.value = true
   addToAnkiStatus.value = ''
 
   try {
     const response = await $fetch<AddToAnkiResponse>('/api/add-to-anki', {
-      method: 'POST'
+      method: 'POST',
+      body: previewCard.value
     })
 
     addToAnkiTone.value = 'success'
     addToAnkiStatus.value =
-      `Added hardcoded note ${response.noteId} to ${response.deckName} using ${response.modelName}.`
+      `Added "${previewCard.value.word}" to ${response.deckName} as note ${response.noteId}.`
   } catch (error) {
     addToAnkiTone.value = 'error'
 
@@ -159,7 +166,7 @@ async function addHardcodedNoteToAnki() {
           <p class="preview-eyebrow">Generated card</p>
           <h2 class="preview-title">Review and edit the preview</h2>
           <p class="preview-copy">
-            This is still mock data for now, but the review flow is live.
+            Review the fields below. The current values will be sent to Anki.
           </p>
 
           <div class="card-form">
