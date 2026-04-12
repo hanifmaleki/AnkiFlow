@@ -7,10 +7,19 @@ type CardPreview = {
   tags: string
 }
 
+type AnkiTestResponse = {
+  ok: boolean
+  version: number
+  deckNames: string[]
+}
+
 const word = ref('')
 const previewCard = ref<CardPreview | null>(null)
 const isGenerating = ref(false)
 const generateError = ref('')
+const isTestingAnki = ref(false)
+const ankiStatus = ref('')
+const ankiStatusTone = ref<'success' | 'error'>('success')
 
 async function generatePreview() {
   isGenerating.value = true
@@ -28,6 +37,31 @@ async function generatePreview() {
     generateError.value = 'Could not generate a preview. Please try again.'
   } finally {
     isGenerating.value = false
+  }
+}
+
+async function testAnkiConnection() {
+  isTestingAnki.value = true
+  ankiStatus.value = ''
+
+  try {
+    const response = await $fetch<AnkiTestResponse>('/api/anki-test')
+    const deckCount = response.deckNames.length
+    const deckLabel = deckCount === 1 ? 'deck' : 'decks'
+
+    ankiStatusTone.value = 'success'
+    ankiStatus.value =
+      `Connected to AnkiConnect v${response.version}. Found ${deckCount} ${deckLabel}.`
+  } catch (error) {
+    ankiStatusTone.value = 'error'
+
+    const message = error instanceof Error
+      ? error.message
+      : 'Could not reach AnkiConnect.'
+
+    ankiStatus.value = message
+  } finally {
+    isTestingAnki.value = false
   }
 }
 </script>
@@ -62,8 +96,25 @@ async function generatePreview() {
             {{ isGenerating ? 'Generating...' : 'Generate' }}
           </button>
         </div>
+        <div class="utility-row">
+          <button
+            class="secondary-button"
+            type="button"
+            :disabled="isTestingAnki"
+            @click="testAnkiConnection"
+          >
+            {{ isTestingAnki ? 'Testing Anki...' : 'Test Anki connection' }}
+          </button>
+        </div>
         <p v-if="generateError" class="error-message" role="alert">
           {{ generateError }}
+        </p>
+        <p
+          v-if="ankiStatus"
+          :class="['status-message', `status-message--${ankiStatusTone}`]"
+          role="status"
+        >
+          {{ ankiStatus }}
         </p>
       </section>
 
@@ -194,8 +245,13 @@ async function generatePreview() {
   gap: 0.75rem;
 }
 
+.utility-row {
+  margin-top: 0.75rem;
+}
+
 .word-input,
 .generate-button,
+.secondary-button,
 .field-input {
   border-radius: 0.9rem;
   border: 1px solid #d1d5db;
@@ -235,8 +291,36 @@ async function generatePreview() {
   }
 }
 
+.secondary-button {
+  padding: 0.75rem 1rem;
+  background: #fff;
+  color: #111827;
+  cursor: pointer;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+
+  &:disabled {
+    color: #6b7280;
+    cursor: wait;
+  }
+}
+
 .error-message {
   margin: 0.75rem 0 0;
+  color: #b91c1c;
+}
+
+.status-message {
+  margin: 0.75rem 0 0;
+}
+
+.status-message--success {
+  color: #047857;
+}
+
+.status-message--error {
   color: #b91c1c;
 }
 
