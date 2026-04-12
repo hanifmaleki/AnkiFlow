@@ -154,10 +154,10 @@ Goal: prove that the app can talk to Anki.
 
 Goal: make the smallest successful card creation.
 
-- [ ] Create `server/api/add-to-anki.post.ts`.
-- [ ] Send one hardcoded note to a chosen test deck.
-- [ ] Trigger this route from the UI.
-- [ ] Show success or failure on the page.
+- [x] Create `server/api/add-to-anki.post.ts`.
+- [x] Send one hardcoded note to a chosen test deck.
+- [x] Trigger this route from the UI.
+- [x] Show success or failure on the page.
 - [ ] Verify the note appears in Anki.
 
 ## Definition of done

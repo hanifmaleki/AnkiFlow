@@ -13,6 +13,13 @@ type AnkiTestResponse = {
   deckNames: string[]
 }
 
+type AddToAnkiResponse = {
+  ok: boolean
+  noteId: number
+  deckName: string
+  modelName: string
+}
+
 const word = ref('')
 const previewCard = ref<CardPreview | null>(null)
 const isGenerating = ref(false)
@@ -20,10 +27,14 @@ const generateError = ref('')
 const isTestingAnki = ref(false)
 const ankiStatus = ref('')
 const ankiStatusTone = ref<'success' | 'error'>('success')
+const isAddingToAnki = ref(false)
+const addToAnkiStatus = ref('')
+const addToAnkiTone = ref<'success' | 'error'>('success')
 
 async function generatePreview() {
   isGenerating.value = true
   generateError.value = ''
+  addToAnkiStatus.value = ''
 
   try {
     previewCard.value = await $fetch<CardPreview>('/api/generate', {
@@ -62,6 +73,31 @@ async function testAnkiConnection() {
     ankiStatus.value = message
   } finally {
     isTestingAnki.value = false
+  }
+}
+
+async function addHardcodedNoteToAnki() {
+  isAddingToAnki.value = true
+  addToAnkiStatus.value = ''
+
+  try {
+    const response = await $fetch<AddToAnkiResponse>('/api/add-to-anki', {
+      method: 'POST'
+    })
+
+    addToAnkiTone.value = 'success'
+    addToAnkiStatus.value =
+      `Added hardcoded note ${response.noteId} to ${response.deckName} using ${response.modelName}.`
+  } catch (error) {
+    addToAnkiTone.value = 'error'
+
+    const message = error instanceof Error
+      ? error.message
+      : 'Could not add note to Anki.'
+
+    addToAnkiStatus.value = message
+  } finally {
+    isAddingToAnki.value = false
   }
 }
 </script>
@@ -173,9 +209,21 @@ async function testAnkiConnection() {
             </label>
           </div>
 
-          <button class="preview-action" type="button" disabled>
-            Add to Anki
+          <button
+            class="preview-action preview-action--enabled"
+            type="button"
+            :disabled="isAddingToAnki"
+            @click="addHardcodedNoteToAnki"
+          >
+            {{ isAddingToAnki ? 'Adding to Anki...' : 'Add to Anki' }}
           </button>
+          <p
+            v-if="addToAnkiStatus"
+            :class="['status-message', `status-message--${addToAnkiTone}`]"
+            role="status"
+          >
+            {{ addToAnkiStatus }}
+          </p>
         </template>
 
         <template v-else>
@@ -378,6 +426,23 @@ async function testAnkiConnection() {
   color: #6b7280;
   font: inherit;
   cursor: not-allowed;
+}
+
+.preview-action--enabled {
+  background: #111827;
+  border-color: #111827;
+  color: #fff;
+  cursor: pointer;
+
+  &:hover {
+    background: #1f2937;
+  }
+
+  &:disabled {
+    background: #9ca3af;
+    border-color: #9ca3af;
+    cursor: wait;
+  }
 }
 
 @media (max-width: 640px) {
