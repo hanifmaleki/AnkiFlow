@@ -32,6 +32,16 @@ The next implementation step is:
 
 - Choose the LLM provider and replace mocked generation with real model output
 
+## Environment
+
+For local Gemini experiments, set your API key in `.env`:
+
+```bash
+GEMINI_API_KEY=your-gemini-api-key-here
+```
+
+Nuxt reads this through `runtimeConfig.geminiApiKey`.
+
 ## Goals
 
 - Build a useful local tool for adding words to Anki
