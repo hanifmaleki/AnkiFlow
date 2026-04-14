@@ -26,11 +26,11 @@ Main documents:
 
 ## Current Status
 
-The project has completed Phase 7 of the review-to-Anki flow.
+The project has implemented Phase 8's Gemini-backed generation flow.
 
 The next implementation step is:
 
-- Choose the LLM provider and replace mocked generation with real model output
+- Verify Gemini-backed generation end to end with a real API key
 
 ## Environment
 
