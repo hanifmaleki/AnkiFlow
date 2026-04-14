@@ -4,6 +4,13 @@ This file records meaningful project changes as the work progresses.
 
 ## 2026-04-12
 
+### Phase 8 real Gemini generation
+
+- Added `server/utils/llm.ts` to call Gemini with structured JSON output
+- Replaced the mocked `server/api/generate.post.ts` response with a Gemini-backed generation flow
+- Added response validation and clear malformed-response handling for generated card data
+- Reused the existing UI contract so generated cards still flow into review and Anki submission
+
 ### Phase 7 reviewed preview data to Anki
 
 - Replaced the hardcoded add-to-Anki payload with the current reviewed preview data

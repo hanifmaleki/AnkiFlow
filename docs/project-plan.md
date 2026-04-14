@@ -184,13 +184,13 @@ Goal: connect the editable preview to real card creation.
 
 Goal: replace mocked generation with real model output.
 
-- [ ] Choose the LLM provider.
-- [ ] Add environment variable support for the API key.
-- [ ] Create `server/utils/llm.ts`.
-- [ ] Write a strict prompt for structured flashcard output.
-- [ ] Validate the returned JSON.
-- [ ] Handle malformed responses safely.
-- [ ] Connect the generate API route to the LLM.
+- [x] Choose the LLM provider.
+- [x] Add environment variable support for the API key.
+- [x] Create `server/utils/llm.ts`.
+- [x] Write a strict prompt for structured flashcard output.
+- [x] Validate the returned JSON.
+- [x] Handle malformed responses safely.
+- [x] Connect the generate API route to the LLM.
 
 ## Definition of done
 
@@ -248,7 +248,7 @@ Only after the core flow works.
 
 The next step should be:
 
-- [ ] Choose the LLM provider.
+- [ ] Verify Gemini-backed generation with a real API key.
 
 ---
 

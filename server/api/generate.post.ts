@@ -1,29 +1,27 @@
-type GenerateCardResponse = {
-  word: string
-  meaning: string
-  exampleSentence: string
-  translationHint: string
-  tags: string
-}
+import { generateCardWithGemini } from '../utils/llm'
 
 type GenerateCardRequest = {
   word?: string
 }
 
-function createMockCard(inputWord: string): GenerateCardResponse {
-  const cleanWord = inputWord.trim() || 'serendipity'
-
-  return {
-    word: cleanWord,
-    meaning: 'A pleasant surprise or a lucky discovery.',
-    exampleSentence: `Finding the perfect example for "${cleanWord}" felt like pure serendipity.`,
-    translationHint: 'Lucky accident; pleasant surprise.',
-    tags: 'vocabulary, everyday-english, review'
-  }
-}
-
 export default defineEventHandler(async (event) => {
   const body = await readBody<GenerateCardRequest>(event)
+  const word = body?.word?.trim() || 'serendipity'
+  const runtimeConfig = useRuntimeConfig(event)
 
-  return createMockCard(body?.word ?? '')
+  try {
+    return await generateCardWithGemini(word, runtimeConfig.geminiApiKey)
+  } catch (error) {
+    const message = error instanceof Error
+      ? error.message
+      : 'Unknown Gemini generation error.'
+
+    throw createError({
+      statusCode: 502,
+      statusMessage: 'Could not generate card content.',
+      data: {
+        message
+      }
+    })
+  }
 })
