@@ -141,7 +141,7 @@ Goal: prove that the app can talk to Anki.
 - [x] Add a function to call AnkiConnect.
 - [x] Add a test route such as `server/api/anki-test.get.ts`.
 - [x] Return a safe response like version info or deck list.
-- [ ] Run Anki locally and verify the app can reach AnkiConnect.
+- [x] Run Anki locally and verify the app can reach AnkiConnect.
 
 ## Definition of done
 
@@ -158,7 +158,7 @@ Goal: make the smallest successful card creation.
 - [x] Send one hardcoded note to a chosen test deck.
 - [x] Trigger this route from the UI.
 - [x] Show success or failure on the page.
-- [ ] Verify the note appears in Anki.
+- [x] Verify the note appears in Anki.
 
 ## Definition of done
 
@@ -191,6 +191,9 @@ Goal: replace mocked generation with real model output.
 - [x] Validate the returned JSON.
 - [x] Handle malformed responses safely.
 - [x] Connect the generate API route to the LLM.
+- [x] Align the generated card schema with the real Anki fields: `Front`, `Image`, `Back`, `Example`, `Description`, plus `Deck` and `Tags`.
+- [x] Keep `Front` in English and keep `Back`, `Example`, and `Description` in German only.
+- [x] Let the LLM choose the deck from `Adjektive`, `Nomen`, `Redewendungen`, or `Verben`.
 
 ## Definition of done
 
@@ -248,7 +251,21 @@ Only after the core flow works.
 
 The next step should be:
 
-- [ ] Verify Gemini-backed generation with a real API key.
+- [ ] Decide what counts as a duplicate.
+
+---
+
+## German Card Profile
+
+Current production-oriented German card rules:
+
+- `Front`: English only
+- `Image`: separate field, optional
+- `Back`: German only
+- `Example`: German only
+- `Description`: German only
+- `Deck`: auto-classified into `Adjektive`, `Nomen`, `Redewendungen`, `Verben`
+- `Tags`: auto-generated, including `Verb`, `Adjektiv`, `Nomen`, `Redewendung`, and optional tags such as `Präposition`, `Küche`, `Kleidung`, `Tier`
 
 ---
 

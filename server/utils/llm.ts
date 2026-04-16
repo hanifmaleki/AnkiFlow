@@ -1,12 +1,10 @@
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
 
-export type GeneratedCard = {
-  word: string
-  meaning: string
-  exampleSentence: string
-  translationHint: string
-  tags: string
-}
+import { ALLOWED_DECKS, type GeneratedCard } from '~~/types/card'
+import {
+  buildGermanCardSystemPrompt,
+  buildGermanCardUserPrompt
+} from '../prompts/german-card'
 
 type GeminiPart = {
   text?: string
@@ -22,16 +20,6 @@ type GeminiResponse = {
   candidates?: GeminiCandidate[]
 }
 
-function buildPrompt(word: string): string {
-  return [
-    'You are generating one Anki flashcard for a language learner.',
-    'Return exactly one JSON object that matches the provided schema.',
-    'Use concise, learner-friendly wording.',
-    'The word to generate a card for is:',
-    word
-  ].join('\n\n')
-}
-
 function validateGeneratedCard(value: unknown): GeneratedCard {
   if (!value || typeof value !== 'object') {
     throw new Error('Gemini returned invalid card data.')
@@ -39,10 +27,12 @@ function validateGeneratedCard(value: unknown): GeneratedCard {
 
   const candidate = value as Record<string, unknown>
   const fields = [
-    'word',
-    'meaning',
-    'exampleSentence',
-    'translationHint',
+    'front',
+    'image',
+    'back',
+    'example',
+    'description',
+    'deck',
     'tags'
   ] as const
 
@@ -53,10 +43,12 @@ function validateGeneratedCard(value: unknown): GeneratedCard {
   }
 
   return {
-    word: candidate.word as string,
-    meaning: candidate.meaning as string,
-    exampleSentence: candidate.exampleSentence as string,
-    translationHint: candidate.translationHint as string,
+    front: candidate.front as string,
+    image: candidate.image as string,
+    back: candidate.back as string,
+    example: candidate.example as string,
+    description: candidate.description as string,
+    deck: candidate.deck as GeneratedCard['deck'],
     tags: candidate.tags as string
   }
 }
@@ -73,12 +65,19 @@ export async function generateCardWithGemini(word: string, apiKey: string): Prom
       'x-goog-api-key': apiKey
     },
     body: JSON.stringify({
+      systemInstruction: {
+        parts: [
+          {
+            text: buildGermanCardSystemPrompt()
+          }
+        ]
+      },
       contents: [
         {
           role: 'user',
           parts: [
             {
-              text: buildPrompt(word)
+              text: buildGermanCardUserPrompt(word)
             }
           ]
         }
@@ -88,28 +87,37 @@ export async function generateCardWithGemini(word: string, apiKey: string): Prom
         responseJsonSchema: {
           type: 'object',
           properties: {
-            word: {
+            front: {
               type: 'string',
-              description: 'The target word exactly as it should appear on the flashcard front.'
+              description: 'English-only front-side prompt or gloss.'
             },
-            meaning: {
+            image: {
               type: 'string',
-              description: 'A concise learner-friendly meaning.'
+              description: 'Image URL or HTML image snippet, or an empty string when not needed.'
             },
-            exampleSentence: {
+            back: {
               type: 'string',
-              description: 'A natural example sentence using the word.'
+              description: 'German-only back-side target including formatting rules and optional synonyms.'
             },
-            translationHint: {
+            example: {
               type: 'string',
-              description: 'A short native-language-friendly hint or gloss.'
+              description: 'German-only example sentence.'
+            },
+            description: {
+              type: 'string',
+              description: 'German-only learning notes such as antonyms or usage help.'
+            },
+            deck: {
+              type: 'string',
+              enum: [...ALLOWED_DECKS],
+              description: 'The Anki deck chosen for this card.'
             },
             tags: {
               type: 'string',
               description: 'A comma-separated tag list for the generated card.'
             }
           },
-          required: ['word', 'meaning', 'exampleSentence', 'translationHint', 'tags']
+          required: ['front', 'image', 'back', 'example', 'description', 'deck', 'tags']
         }
       }
     })

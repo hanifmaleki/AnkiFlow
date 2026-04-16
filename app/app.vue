@@ -1,12 +1,5 @@
 <script setup lang="ts">
-type CardPreview = {
-  word: string
-  meaning: string
-  exampleSentence: string
-  translationHint: string
-  tags: string
-}
-
+import { ALLOWED_DECKS, type GeneratedCard } from '~~/types/card'
 type AnkiTestResponse = {
   ok: boolean
   version: number
@@ -21,7 +14,7 @@ type AddToAnkiResponse = {
 }
 
 const word = ref('')
-const previewCard = ref<CardPreview | null>(null)
+const previewCard = ref<GeneratedCard | null>(null)
 const isGenerating = ref(false)
 const generateError = ref('')
 const isTestingAnki = ref(false)
@@ -37,7 +30,7 @@ async function generatePreview() {
   addToAnkiStatus.value = ''
 
   try {
-    previewCard.value = await $fetch<CardPreview>('/api/generate', {
+    previewCard.value = await $fetch<GeneratedCard>('/api/generate', {
       method: 'POST',
       body: {
         word: word.value
@@ -76,7 +69,7 @@ async function testAnkiConnection() {
   }
 }
 
-async function addHardcodedNoteToAnki() {
+async function addReviewedCardToAnki() {
   if (!previewCard.value) {
     addToAnkiTone.value = 'error'
     addToAnkiStatus.value = 'Generate a card before adding it to Anki.'
@@ -94,7 +87,7 @@ async function addHardcodedNoteToAnki() {
 
     addToAnkiTone.value = 'success'
     addToAnkiStatus.value =
-      `Added "${previewCard.value.word}" to ${response.deckName} as note ${response.noteId}.`
+      `Added card to ${response.deckName} as note ${response.noteId}.`
   } catch (error) {
     addToAnkiTone.value = 'error'
 
@@ -171,39 +164,64 @@ async function addHardcodedNoteToAnki() {
 
           <div class="card-form">
             <label class="field">
-              <span class="field-label">Word</span>
+              <span class="field-label">Front</span>
               <input
-                v-model="previewCard.word"
+                v-model="previewCard.front"
                 class="field-input"
                 type="text"
               >
             </label>
 
             <label class="field">
-              <span class="field-label">Meaning</span>
+              <span class="field-label">Image</span>
+              <input
+                v-model="previewCard.image"
+                class="field-input"
+                type="text"
+              >
+            </label>
+
+            <label class="field">
+              <span class="field-label">Back</span>
               <textarea
-                v-model="previewCard.meaning"
+                v-model="previewCard.back"
                 class="field-input field-textarea"
                 rows="3"
               />
             </label>
 
             <label class="field">
-              <span class="field-label">Example sentence</span>
+              <span class="field-label">Example</span>
               <textarea
-                v-model="previewCard.exampleSentence"
+                v-model="previewCard.example"
                 class="field-input field-textarea"
                 rows="4"
               />
             </label>
 
             <label class="field">
-              <span class="field-label">Translation hint</span>
+              <span class="field-label">Description</span>
               <textarea
-                v-model="previewCard.translationHint"
+                v-model="previewCard.description"
                 class="field-input field-textarea"
                 rows="3"
               />
+            </label>
+
+            <label class="field">
+              <span class="field-label">Deck</span>
+              <select
+                v-model="previewCard.deck"
+                class="field-input"
+              >
+                <option
+                  v-for="deck in ALLOWED_DECKS"
+                  :key="deck"
+                  :value="deck"
+                >
+                  {{ deck }}
+                </option>
+              </select>
             </label>
 
             <label class="field">
@@ -220,7 +238,7 @@ async function addHardcodedNoteToAnki() {
             class="preview-action preview-action--enabled"
             type="button"
             :disabled="isAddingToAnki"
-            @click="addHardcodedNoteToAnki"
+            @click="addReviewedCardToAnki"
           >
             {{ isAddingToAnki ? 'Adding to Anki...' : 'Add to Anki' }}
           </button>
