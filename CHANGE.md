@@ -2,6 +2,16 @@
 
 This file records meaningful project changes as the work progresses.
 
+## 2026-04-15
+
+### German production card schema
+
+- Added shared card types so the frontend and backend use the same generation schema
+- Added a dedicated German prompt module instead of keeping prompt rules inline
+- Updated Gemini generation to produce `Front`, `Image`, `Back`, `Example`, `Description`, `Deck`, and `Tags`
+- Updated the review UI to edit the real card fields, including deck selection
+- Updated Anki note creation to map directly to the real note fields and selected deck
+
 ## 2026-04-12
 
 ### Phase 8 real Gemini generation

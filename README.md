@@ -26,11 +26,11 @@ Main documents:
 
 ## Current Status
 
-The project has implemented Phase 8's Gemini-backed generation flow.
+The project has implemented a Gemini-backed German card generation flow aligned to the real Anki setup.
 
 The next implementation step is:
 
-- Verify Gemini-backed generation end to end with a real API key
+- Add duplicate checks before creating notes
 
 ## Environment
 
@@ -41,6 +41,28 @@ GEMINI_API_KEY=your-gemini-api-key-here
 ```
 
 Nuxt reads this through `runtimeConfig.geminiApiKey`.
+
+## Current Card Shape
+
+Generated cards now target these Anki fields:
+
+- `Front`
+- `Image`
+- `Back`
+- `Example`
+- `Description`
+
+Additional metadata:
+
+- `Deck`
+- `Tags`
+
+Current German card profile:
+
+- `Front` is English only
+- `Back`, `Example`, and `Description` are German only
+- `Deck` is auto-classified into `Adjektive`, `Nomen`, `Redewendungen`, or `Verben`
+- `Image` stays empty unless a visual aid is genuinely helpful
 
 ## Goals
 
