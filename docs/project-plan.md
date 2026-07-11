@@ -248,7 +248,7 @@ Only after the core flow works.
 
 The next step should be:
 
-- [ ] Verify Gemini-backed generation with a real API key.
+- [ ] Verify the German card preview and add-to-Anki flow with real Gemini output.
 
 ---
 
@@ -258,6 +258,7 @@ The next step should be:
 - [x] Keep backend logic inside Nuxt server routes.
 - [x] Start with a review-before-add flow.
 - [x] Continue with the generated Nuxt 4 starter.
+- [x] Use a shared card schema for frontend and backend.
 - [ ] Choose the initial target language.
 - [ ] Choose the Anki deck and note model for development.
 

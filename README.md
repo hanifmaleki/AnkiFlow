@@ -26,11 +26,11 @@ Main documents:
 
 ## Current Status
 
-The project has implemented Phase 8's Gemini-backed generation flow.
+The project has implemented Phase 8's Gemini-backed generation flow and the shared German card schema.
 
 The next implementation step is:
 
-- Verify Gemini-backed generation end to end with a real API key
+- Verify the German preview and add-to-Anki flow end to end with a real API key
 
 ## Environment
 
