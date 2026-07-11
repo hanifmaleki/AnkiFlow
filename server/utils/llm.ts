@@ -47,6 +47,7 @@ function buildSystemPrompt() {
         '- Add tag "Tier" for animals.',
         '',
         'Formatting rules for German output:',
+        '- Include the article in the back for every word where an article exists or helps learning, not only nouns.',
         '- If the target is a noun, include the article and wrap it with one of <der>...</der>, <die>...</die>, <das>...</das>.',
         '- If case information is relevant, use <nom>...</nom>, <akk>...</akk>, <dat>...</dat>.',
         '- If the verb is reflexive, write <refl>sich</refl>.',
