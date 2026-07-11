@@ -4,6 +4,13 @@ This file records meaningful project changes as the work progresses.
 
 ## 2026-04-12
 
+### Shared German card schema
+
+- Added a shared `types/card.ts` schema for the generated flashcard fields
+- Updated the homepage preview to edit the new `front`, `image`, `back`, `example`, `description`, `deck`, and `tags` fields
+- Updated the add-to-Anki route to accept the new generated card payload
+- Made the Gemini helper treat `image` as nullable and reject invalid deck values early
+
 ### Phase 8 real Gemini generation
 
 - Added `server/utils/llm.ts` to call Gemini with structured JSON output
