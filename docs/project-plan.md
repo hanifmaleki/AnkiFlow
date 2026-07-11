@@ -213,6 +213,21 @@ Goal: avoid adding the same word multiple times.
 
 ---
 
+## Phase 8.5: Preview Polish
+
+Goal: make the generated preview easier to read before adding duplicate checks.
+
+- [ ] Render supported inline markup in the preview, including `b`, `der`, `die`, `das`, `nom`, `akk`, `dat`, and `refl`.
+- [ ] Show a fallback image placeholder when the generated image is `null`.
+- [ ] Keep the implementation lightweight and local unless a reusable component becomes clearly useful.
+
+## Definition of done
+
+- The preview shows styled card content instead of literal markup.
+- The image area still looks intentional when no image is generated.
+
+---
+
 ## Phase 10: Basic Product Quality
 
 Goal: make the app stable enough for regular use.
@@ -248,7 +263,7 @@ Only after the core flow works.
 
 The next step should be:
 
-- [ ] Verify the German card preview and add-to-Anki flow with real Gemini output.
+- [ ] Polish the preview rendering and image fallback before moving to duplicate checks.
 
 ---
 

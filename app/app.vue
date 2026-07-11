@@ -26,6 +26,53 @@ const isAddingToAnki = ref(false)
 const addToAnkiStatus = ref('')
 const addToAnkiTone = ref<'success' | 'error'>('success')
 
+const ALLOWED_PREVIEW_TAGS = [
+  'b',
+  'br',
+  'der',
+  'die',
+  'das',
+  'nom',
+  'akk',
+  'dat',
+  'refl'
+] as const
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+}
+
+function renderPreviewMarkup(value: string): string {
+  let html = escapeHtml(value)
+
+  for (const tag of ALLOWED_PREVIEW_TAGS) {
+    if (tag === 'br') {
+      html = html
+        .replaceAll(/&lt;br\s*\/&gt;/gi, '<br />')
+        .replaceAll(/&lt;br&gt;/gi, '<br />')
+      continue
+    }
+
+    html = html
+      .replaceAll(new RegExp(`&lt;${tag}&gt;`, 'gi'), `<${tag}>`)
+      .replaceAll(new RegExp(`&lt;/${tag}&gt;`, 'gi'), `</${tag}>`)
+  }
+
+  return html
+}
+
+function getPreviewImageUrl(image: string | null): string | null {
+  const trimmed = image?.trim()
+  return trimmed ? trimmed : null
+}
+
+const previewImageUrl = computed(() => getPreviewImageUrl(previewCard.value?.image ?? null))
+
 async function generatePreview() {
   isGenerating.value = true
   generateError.value = ''
@@ -124,6 +171,7 @@ async function addReviewedCardToAnki() {
             class="word-input"
             type="text"
             placeholder="Enter a word"
+            @keyup.enter="generatePreview"
           >
           <button
             class="generate-button"
@@ -163,6 +211,60 @@ async function addReviewedCardToAnki() {
           <p class="preview-copy">
             Review the fields below. The current values will be sent to Anki.
           </p>
+
+          <section class="rendered-preview" aria-label="Rendered preview">
+            <article class="rendered-preview-card">
+              <p class="rendered-preview-label">Front</p>
+              <p
+                class="rendered-preview-value rendered-preview-value--front"
+                v-html="renderPreviewMarkup(previewCard.front)"
+              />
+            </article>
+
+            <article class="rendered-preview-card">
+              <p class="rendered-preview-label">Image</p>
+              <div
+                v-if="previewImageUrl"
+                class="rendered-preview-image-frame"
+              >
+                <img
+                  class="rendered-preview-image"
+                  :src="previewImageUrl"
+                  alt="Generated card image"
+                >
+              </div>
+              <div v-else class="rendered-preview-image-fallback" aria-label="No image generated">
+                <span class="rendered-preview-image-fallback-icon">No image</span>
+                <span class="rendered-preview-image-fallback-copy">
+                  The model did not generate an image for this card.
+                </span>
+              </div>
+            </article>
+
+            <article class="rendered-preview-card">
+              <p class="rendered-preview-label">Back</p>
+              <p
+                class="rendered-preview-value"
+                v-html="renderPreviewMarkup(previewCard.back)"
+              />
+            </article>
+
+            <article class="rendered-preview-card">
+              <p class="rendered-preview-label">Example</p>
+              <p
+                class="rendered-preview-value"
+                v-html="renderPreviewMarkup(previewCard.example)"
+              />
+            </article>
+
+            <article class="rendered-preview-card">
+              <p class="rendered-preview-label">Description</p>
+              <p
+                class="rendered-preview-value"
+                v-html="renderPreviewMarkup(previewCard.description)"
+              />
+            </article>
+          </section>
 
           <div class="card-form">
             <label class="field">
@@ -432,6 +534,72 @@ async function addReviewedCardToAnki() {
   display: grid;
   gap: 1rem;
   margin-top: 1.5rem;
+}
+
+.rendered-preview {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.rendered-preview-card {
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  background: #fff;
+}
+
+.rendered-preview-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.rendered-preview-value {
+  margin: 0;
+  line-height: 1.7;
+  color: #111827;
+}
+
+.rendered-preview-value--front {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.rendered-preview-image-frame {
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.9rem;
+  background: #f9fafb;
+}
+
+.rendered-preview-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.rendered-preview-image-fallback {
+  display: grid;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px dashed #d1d5db;
+  border-radius: 0.9rem;
+  background: #f9fafb;
+  color: #6b7280;
+}
+
+.rendered-preview-image-fallback-icon {
+  font-weight: 700;
+  color: #374151;
+}
+
+.rendered-preview-image-fallback-copy {
+  line-height: 1.5;
 }
 
 .field {
