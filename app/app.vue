@@ -24,7 +24,7 @@ const ankiStatus = ref('')
 const ankiStatusTone = ref<'success' | 'error'>('success')
 const isAddingToAnki = ref(false)
 const addToAnkiStatus = ref('')
-const addToAnkiTone = ref<'success' | 'error'>('success')
+const addToAnkiTone = ref<'success' | 'error' | 'warning'>('success')
 
 async function generatePreview() {
   isGenerating.value = true
@@ -91,13 +91,32 @@ async function addReviewedCardToAnki() {
     addToAnkiStatus.value =
       `Added card to ${response.deckName} as note ${response.noteId}.`
   } catch (error) {
-    addToAnkiTone.value = 'error'
+    const fetchError = error as {
+      statusCode?: number
+      data?: {
+        duplicate?: boolean
+        front?: string
+        deck?: string
+        noteIds?: number[]
+        message?: string
+      }
+      message?: string
+    }
 
-    const message = error instanceof Error
-      ? error.message
-      : 'Could not add note to Anki.'
+    if (fetchError.statusCode === 409 || fetchError.data?.duplicate) {
+      addToAnkiTone.value = 'warning'
+      addToAnkiStatus.value =
+        fetchError.data?.message ??
+        'This card already exists in Anki, so it was not added again.'
+    } else {
+      addToAnkiTone.value = 'error'
 
-    addToAnkiStatus.value = message
+      const message = error instanceof Error
+        ? error.message
+        : fetchError.data?.message ?? 'Could not add note to Anki.'
+
+      addToAnkiStatus.value = message
+    }
   } finally {
     isAddingToAnki.value = false
   }
@@ -397,6 +416,10 @@ async function addReviewedCardToAnki() {
 
 .status-message--error {
   color: #b91c1c;
+}
+
+.status-message--warning {
+  color: #b45309;
 }
 
 .preview-panel {

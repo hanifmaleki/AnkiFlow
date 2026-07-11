@@ -204,8 +204,8 @@ Goal: avoid adding the same word multiple times.
 
 - [x] Decide what counts as a duplicate.
 - [x] Add an AnkiConnect search before creating a note.
-- [ ] Show duplicate warnings in the UI.
-- [ ] Prevent accidental duplicate inserts.
+- [x] Show duplicate warnings in the UI.
+- [x] Prevent accidental duplicate inserts.
 
 Duplicate rule:
 
@@ -254,7 +254,7 @@ Only after the core flow works.
 
 The next step should be:
 
-- [ ] Show duplicate warnings in the UI.
+- [ ] Decide whether duplicate cards should also be checked by front text across all decks or only within the current deck.
 
 ---
 
