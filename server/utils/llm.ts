@@ -25,7 +25,9 @@ function buildSystemPrompt() {
         '',
         'Field rules:',
         '- front must be English only.',
-    '- image is a separate field and may be an empty string or null.',
+        '- image is optional and should be null unless you are very sure about a direct, publicly accessible image URL.',
+        '- Never invent, guess, or fabricate image URLs.',
+        '- If you do provide an image, it must be a stable https URL that points directly to an image file.',
         '- back must be German only.',
         '- example must be German only.',
         '- description must be German only.',
@@ -45,6 +47,7 @@ function buildSystemPrompt() {
         '- Add tag "Tier" for animals.',
         '',
         'Formatting rules for German output:',
+        '- Include the article in the back for every word where an article exists or helps learning, not only nouns.',
         '- If the target is a noun, include the article and wrap it with one of <der>...</der>, <die>...</die>, <das>...</das>.',
         '- If case information is relevant, use <nom>...</nom>, <akk>...</akk>, <dat>...</dat>.',
         '- If the verb is reflexive, write <refl>sich</refl>.',
@@ -57,8 +60,9 @@ function buildSystemPrompt() {
         '- Back, example, and description must contain no English.',
         '- Example should be natural, practical, and learner-friendly German.',
         '- Description should contain helpful German-only learning notes.',
-        '- Use image only when it materially helps with concrete visual concepts such as food, clothing, animals, or objects. Otherwise return an empty string.',
-    '- Keep tags concise and relevant.'
+        '- Use image only for concrete visual concepts such as food, clothing, animals, or objects, and only when you know a valid direct image URL.',
+        '- Otherwise return null for image.',
+        '- Keep tags concise and relevant.'
     ].join('\n')
 }
 
@@ -67,12 +71,59 @@ function buildPrompt(word: string): string {
     'You are generating one Anki flashcard for a German learner.',
     'Return exactly one JSON object that matches the provided schema.',
     'Use concise, learner-friendly wording.',
+    'For image, prefer null unless a direct, valid image URL is obvious and reliable.',
     'The word to generate a card for is:',
     word
   ].join('\n\n')
 }
 
-function validateGeneratedCard(value: unknown): GeneratedCard {
+async function normalizeImageUrl(image: unknown): Promise<string | null> {
+  if (typeof image !== 'string') {
+    return null
+  }
+
+  const trimmed = image.trim()
+
+  if (!trimmed) {
+    return null
+  }
+
+  let url: URL
+
+  try {
+    url = new URL(trimmed)
+  } catch {
+    return null
+  }
+
+  if (!['http:', 'https:'].includes(url.protocol)) {
+    return null
+  }
+
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 2500)
+
+  try {
+    const response = await fetch(url, {
+      method: 'HEAD',
+      redirect: 'follow',
+      signal: controller.signal
+    })
+    const contentType = response.headers.get('content-type')?.toLowerCase() ?? ''
+
+    if (!response.ok || !contentType.startsWith('image/')) {
+      return null
+    }
+
+    return url.toString()
+  } catch {
+    return null
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+async function validateGeneratedCard(value: unknown): Promise<GeneratedCard> {
   if (!value || typeof value !== 'object') {
     throw new Error('Gemini returned invalid card data.')
   }
@@ -93,10 +144,7 @@ function validateGeneratedCard(value: unknown): GeneratedCard {
     }
   }
 
-  const image = candidate.image
-  if (image !== undefined && image !== null && typeof image !== 'string') {
-    throw new Error('Gemini returned an invalid "image" value.')
-  }
+  const image = await normalizeImageUrl(candidate.image)
 
   if (!ALLOWED_DECKS.includes(candidate.deck as GeneratedCard['deck'])) {
     throw new Error('Gemini returned an invalid "deck" value.')
@@ -104,7 +152,7 @@ function validateGeneratedCard(value: unknown): GeneratedCard {
 
   return {
     front: candidate.front as string,
-    image: typeof image === 'string' && image.trim() ? image : null,
+    image,
     back: candidate.back as string,
     example: candidate.example as string,
     description: candidate.description as string,
