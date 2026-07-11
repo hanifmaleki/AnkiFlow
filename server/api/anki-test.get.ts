@@ -1,9 +1,9 @@
-import { callAnkiConnect } from '../utils/anki'
+import { AnkiService } from '../services/ankiService'
 
 export default defineEventHandler(async () => {
   try {
-    const version = await callAnkiConnect<number>('version')
-    const deckNames = await callAnkiConnect<string[]>('deckNames')
+    const service = new AnkiService()
+    const { version, deckNames } = await service.testConnection()
 
     return {
       ok: true,

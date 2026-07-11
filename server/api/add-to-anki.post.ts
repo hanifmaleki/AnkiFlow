@@ -1,65 +1,58 @@
-import { addNote } from '../utils/anki'
-import { ALLOWED_DECKS } from '../../types/card'
+import { AnkiService } from '../services/ankiService'
 import type { GeneratedCard } from '../../types/card'
-
-const DEFAULT_MODEL_NAME = 'Basic'
-
-function requireText(value: string | undefined, label: string): string {
-  const trimmed = value?.trim()
-
-  if (!trimmed) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: `${label} is required.`
-    })
-  }
-
-  return trimmed
-}
-
-function requireDeck(value: string | undefined): GeneratedCard['deck'] {
-  if (value && ALLOWED_DECKS.includes(value as GeneratedCard['deck'])) {
-    return value as GeneratedCard['deck']
-  }
-
-  throw createError({
-    statusCode: 400,
-    statusMessage: 'Deck must be one of the allowed deck names.'
-  })
-}
 
 export default defineEventHandler(async (event) => {
   try {
+    const service = new AnkiService()
     const body = await readBody<Partial<GeneratedCard>>(event)
-    const front = requireText(body?.front, 'Front')
+    const front = body?.front?.trim()
     const image = body?.image?.trim() ?? ''
-    const back = requireText(body?.back, 'Back')
-    const example = requireText(body?.example, 'Example')
-    const description = requireText(body?.description, 'Description')
-    const deck = requireDeck(body?.deck)
+    const back = body?.back?.trim()
+    const example = body?.example?.trim()
+    const description = body?.description?.trim()
+    const deck = body?.deck
     const tags = body?.tags
       ?.split(',')
       .map(tag => tag.trim())
       .filter(Boolean)
 
-    const noteId = await addNote({
-      deckName: deck,
-      modelName: DEFAULT_MODEL_NAME,
-      fields: {
-        Front: front,
-        Image: image,
-        Back: back,
-        Example: example,
-        Description: description
-      },
-      tags: tags?.length ? tags : ['ankiflow']
+    if (!front || !back || !example || !description || !deck) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Front, Back, Example, Description, and Deck are required.'
+      })
+    }
+
+    const duplicate = await service.findDuplicateCard(front, deck)
+
+    if (duplicate.noteIds.length > 0) {
+      throw createError({
+        statusCode: 409,
+        statusMessage: 'This card already exists in Anki.',
+        data: {
+          duplicate: true,
+          noteIds: duplicate.noteIds,
+          deck: duplicate.deck,
+          front: duplicate.front
+        }
+      })
+    }
+
+    const noteId = await service.addCard({
+      front,
+      image,
+      back,
+      example,
+      description,
+      deck,
+      tags: tags ?? []
     })
 
     return {
       ok: true,
       noteId,
       deckName: deck,
-      modelName: DEFAULT_MODEL_NAME
+      modelName: 'Basic'
     }
   } catch (error) {
     if (isError(error)) {
