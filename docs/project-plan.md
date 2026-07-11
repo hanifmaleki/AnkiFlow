@@ -202,10 +202,16 @@ Goal: replace mocked generation with real model output.
 
 Goal: avoid adding the same word multiple times.
 
-- [ ] Decide what counts as a duplicate.
-- [ ] Add an AnkiConnect search before creating a note.
-- [ ] Show duplicate warnings in the UI.
-- [ ] Prevent accidental duplicate inserts.
+- [x] Decide what counts as a duplicate.
+- [x] Add an AnkiConnect search before creating a note.
+- [x] Show duplicate warnings in the UI.
+- [x] Prevent accidental duplicate inserts.
+
+Duplicate rule:
+
+- A card is a duplicate when the same English `Front` already exists in the same deck.
+- Compare the `Front` value after trimming whitespace and normalizing case.
+- Allow the same front text in a different deck when the meaning or part of speech is different.
 
 ## Definition of done
 
@@ -263,7 +269,7 @@ Only after the core flow works.
 
 The next step should be:
 
-- [ ] Polish the preview rendering and image fallback before moving to duplicate checks.
+- [ ] Decide whether duplicate cards should also be checked by front text across all decks or only within the current deck.
 
 ---
 
