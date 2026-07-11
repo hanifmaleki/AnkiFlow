@@ -66,6 +66,13 @@ function renderPreviewMarkup(value: string): string {
   return html
 }
 
+function getPreviewImageUrl(image: string | null): string | null {
+  const trimmed = image?.trim()
+  return trimmed ? trimmed : null
+}
+
+const previewImageUrl = computed(() => getPreviewImageUrl(previewCard.value?.image ?? null))
+
 async function generatePreview() {
   isGenerating.value = true
   generateError.value = ''
@@ -164,6 +171,7 @@ async function addReviewedCardToAnki() {
             class="word-input"
             type="text"
             placeholder="Enter a word"
+            @keyup.enter="generatePreview"
           >
           <button
             class="generate-button"
@@ -211,6 +219,26 @@ async function addReviewedCardToAnki() {
                 class="rendered-preview-value rendered-preview-value--front"
                 v-html="renderPreviewMarkup(previewCard.front)"
               />
+            </article>
+
+            <article class="rendered-preview-card">
+              <p class="rendered-preview-label">Image</p>
+              <div
+                v-if="previewImageUrl"
+                class="rendered-preview-image-frame"
+              >
+                <img
+                  class="rendered-preview-image"
+                  :src="previewImageUrl"
+                  alt="Generated card image"
+                >
+              </div>
+              <div v-else class="rendered-preview-image-fallback" aria-label="No image generated">
+                <span class="rendered-preview-image-fallback-icon">No image</span>
+                <span class="rendered-preview-image-fallback-copy">
+                  The model did not generate an image for this card.
+                </span>
+              </div>
             </article>
 
             <article class="rendered-preview-card">
@@ -539,6 +567,39 @@ async function addReviewedCardToAnki() {
 .rendered-preview-value--front {
   font-size: 1.1rem;
   font-weight: 600;
+}
+
+.rendered-preview-image-frame {
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.9rem;
+  background: #f9fafb;
+}
+
+.rendered-preview-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.rendered-preview-image-fallback {
+  display: grid;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px dashed #d1d5db;
+  border-radius: 0.9rem;
+  background: #f9fafb;
+  color: #6b7280;
+}
+
+.rendered-preview-image-fallback-icon {
+  font-weight: 700;
+  color: #374151;
+}
+
+.rendered-preview-image-fallback-copy {
+  line-height: 1.5;
 }
 
 .field {
