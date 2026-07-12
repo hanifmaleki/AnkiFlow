@@ -265,11 +265,47 @@ Only after the core flow works.
 
 ---
 
+## Next Version Plan
+
+Goal: rebuild the UI in small learnable steps.
+
+### Phase 12: UI Foundation
+
+- [ ] Replace the current homepage with a simple placeholder layout.
+- [ ] Keep each major area visible with borders and labels.
+- [ ] Use this version to learn the future layout before adding behavior.
+
+### Phase 13: Reusable Card Components
+
+- [ ] Make the rendered HTML preview a reusable component.
+- [ ] Make the card form a reusable component and keep it editable.
+- [ ] Keep safe rendering logic inside the component.
+
+### Phase 14: Card Browser
+
+- [ ] Add a basic screen to browse current cards.
+- [ ] Add search or filtering by deck and text.
+- [ ] Prepare the edit/regenerate flow for a selected card.
+
+### Phase 15: Prompt Settings
+
+- [ ] Add a UI for viewing and editing the system prompt.
+- [ ] Add a reset-to-default action.
+- [ ] Decide how prompt changes are stored.
+
+### Phase 16: UI Redesign
+
+- [ ] Redesign the layout once the structure is stable.
+- [ ] Make the app feel polished and consistent.
+- [ ] Keep the design simple enough to support learning.
+
+---
+
 ## Immediate Next Step
 
 The next step should be:
 
-- [ ] Decide whether duplicate cards should also be checked by front text across all decks or only within the current deck.
+- [ ] Build the UI foundation as a simple placeholder layout.
 
 ---
 

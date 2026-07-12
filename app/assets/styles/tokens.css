@@ -1,0 +1,13 @@
+:root {
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f8fafc;
+  --color-bg-soft: #f3f4f6;
+  --color-bg-elevated: rgba(255, 255, 255, 0.85);
+  --color-border: #cbd5e1;
+  --color-border-soft: #e2e8f0;
+  --color-text: #0f172a;
+  --color-text-strong: #111827;
+  --color-text-muted: #475569;
+  --color-text-soft: #64748b;
+  --color-accent: #111827;
+}
