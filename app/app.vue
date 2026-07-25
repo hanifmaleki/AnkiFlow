@@ -1,390 +1,34 @@
-<script setup lang="ts">
-import { ALLOWED_DECKS } from '../types/card'
-import type { GeneratedCard } from '../types/card'
-
-type AnkiTestResponse = {
-  ok: boolean
-  version: number
-  deckNames: string[]
-}
-
-type AddToAnkiResponse = {
-  ok: boolean
-  noteId: number
-  deckName: string
-  modelName: string
-}
-
-const word = ref('')
-const previewCard = ref<GeneratedCard | null>(null)
-const isGenerating = ref(false)
-const generateError = ref('')
-const isTestingAnki = ref(false)
-const ankiStatus = ref('')
-const ankiStatusTone = ref<'success' | 'error'>('success')
-const isAddingToAnki = ref(false)
-const addToAnkiStatus = ref('')
-const addToAnkiTone = ref<'success' | 'error' | 'warning'>('success')
-
-const ALLOWED_PREVIEW_TAGS = [
-  'b',
-  'br',
-  'der',
-  'die',
-  'das',
-  'nom',
-  'akk',
-  'dat',
-  'refl'
-] as const
-
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;')
-}
-
-function renderPreviewMarkup(value: string): string {
-  let html = escapeHtml(value)
-
-  for (const tag of ALLOWED_PREVIEW_TAGS) {
-    if (tag === 'br') {
-      html = html
-        .replaceAll(/&lt;br\s*\/&gt;/gi, '<br />')
-        .replaceAll(/&lt;br&gt;/gi, '<br />')
-      continue
-    }
-
-    html = html
-      .replaceAll(new RegExp(`&lt;${tag}&gt;`, 'gi'), `<${tag}>`)
-      .replaceAll(new RegExp(`&lt;/${tag}&gt;`, 'gi'), `</${tag}>`)
-  }
-
-  return html
-}
-
-function getPreviewImageUrl(image: string | null): string | null {
-  const trimmed = image?.trim()
-  return trimmed ? trimmed : null
-}
-
-const previewImageUrl = computed(() => getPreviewImageUrl(previewCard.value?.image ?? null))
-
-async function generatePreview() {
-  isGenerating.value = true
-  generateError.value = ''
-  addToAnkiStatus.value = ''
-
-  try {
-    previewCard.value = await $fetch<GeneratedCard>('/api/generate', {
-      method: 'POST',
-      body: {
-        word: word.value
-      }
-    })
-  } catch {
-    previewCard.value = null
-    generateError.value = 'Could not generate a preview. Please try again.'
-  } finally {
-    isGenerating.value = false
-  }
-}
-
-async function testAnkiConnection() {
-  isTestingAnki.value = true
-  ankiStatus.value = ''
-
-  try {
-    const response = await $fetch<AnkiTestResponse>('/api/anki-test')
-    const deckCount = response.deckNames.length
-    const deckLabel = deckCount === 1 ? 'deck' : 'decks'
-
-    ankiStatusTone.value = 'success'
-    ankiStatus.value =
-      `Connected to AnkiConnect v${response.version}. Found ${deckCount} ${deckLabel}.`
-  } catch (error) {
-    ankiStatusTone.value = 'error'
-
-    const message = error instanceof Error
-      ? error.message
-      : 'Could not reach AnkiConnect.'
-
-    ankiStatus.value = message
-  } finally {
-    isTestingAnki.value = false
-  }
-}
-
-async function addReviewedCardToAnki() {
-  if (!previewCard.value) {
-    addToAnkiTone.value = 'error'
-    addToAnkiStatus.value = 'Generate a card before adding it to Anki.'
-    return
-  }
-
-  isAddingToAnki.value = true
-  addToAnkiStatus.value = ''
-
-  try {
-    const response = await $fetch<AddToAnkiResponse>('/api/add-to-anki', {
-      method: 'POST',
-      body: previewCard.value
-    })
-
-    addToAnkiTone.value = 'success'
-    addToAnkiStatus.value =
-      `Added card to ${response.deckName} as note ${response.noteId}.`
-  } catch (error) {
-    const fetchError = error as {
-      statusCode?: number
-      data?: {
-        duplicate?: boolean
-        front?: string
-        deck?: string
-        noteIds?: number[]
-        message?: string
-      }
-      message?: string
-    }
-
-    if (fetchError.statusCode === 409 || fetchError.data?.duplicate) {
-      addToAnkiTone.value = 'warning'
-      addToAnkiStatus.value =
-        fetchError.data?.message ??
-        'This card already exists in Anki, so it was not added again.'
-    } else {
-      addToAnkiTone.value = 'error'
-
-      const message = error instanceof Error
-        ? error.message
-        : fetchError.data?.message ?? 'Could not add note to Anki.'
-
-      addToAnkiStatus.value = message
-    }
-  } finally {
-    isAddingToAnki.value = false
-  }
-}
-</script>
-
 <template>
   <main class="page">
-    <NuxtRouteAnnouncer />
     <div class="shell">
-      <section class="hero">
+      <header class="panel panel--hero">
+        <p class="eyebrow">UI Foundation</p>
         <h1 class="title">AnkiFlow</h1>
         <p class="subtitle">
-          Generate and review Anki cards before adding them.
+          A simple layout for browsing, editing, prompting, and reviewing cards.
         </p>
-      </section>
+      </header>
 
-      <section class="input-panel" aria-label="Word input">
-        <label class="input-label" for="word">Word</label>
-        <div class="input-row">
-          <input
-            id="word"
-            v-model="word"
-            class="word-input"
-            type="text"
-            placeholder="Enter a word"
-            @keyup.enter="generatePreview"
-          >
-          <button
-            class="generate-button"
-            type="button"
-            :disabled="isGenerating"
-            @click="generatePreview"
-          >
-            {{ isGenerating ? 'Generating...' : 'Generate' }}
-          </button>
+      <section class="grid">
+        <div class="panel panel--input">
+          <p class="panel-label">Input Area</p>
+          <div class="placeholder-box">Word input and generate action</div>
         </div>
-        <div class="utility-row">
-          <button
-            class="secondary-button"
-            type="button"
-            :disabled="isTestingAnki"
-            @click="testAnkiConnection"
-          >
-            {{ isTestingAnki ? 'Testing Anki...' : 'Test Anki connection' }}
-          </button>
+
+        <div class="panel panel--browser">
+          <p class="panel-label">Card Browser</p>
+          <div class="placeholder-box">List of current cards</div>
         </div>
-        <p v-if="generateError" class="error-message" role="alert">
-          {{ generateError }}
-        </p>
-        <p
-          v-if="ankiStatus"
-          :class="['status-message', `status-message--${ankiStatusTone}`]"
-          role="status"
-        >
-          {{ ankiStatus }}
-        </p>
-      </section>
 
-      <section class="preview-panel" aria-label="Card preview">
-        <template v-if="previewCard">
-          <p class="preview-eyebrow">Generated card</p>
-          <h2 class="preview-title">Review and edit the preview</h2>
-          <p class="preview-copy">
-            Review the fields below. The current values will be sent to Anki.
-          </p>
+        <div class="panel panel--editor">
+          <p class="panel-label">Card Editor</p>
+          <div class="placeholder-box">Rendered preview and editable card form</div>
+        </div>
 
-          <section class="rendered-preview" aria-label="Rendered preview">
-            <article class="rendered-preview-card">
-              <p class="rendered-preview-label">Front</p>
-              <p
-                class="rendered-preview-value rendered-preview-value--front"
-                v-html="renderPreviewMarkup(previewCard.front)"
-              />
-            </article>
-
-            <article class="rendered-preview-card">
-              <p class="rendered-preview-label">Image</p>
-              <div
-                v-if="previewImageUrl"
-                class="rendered-preview-image-frame"
-              >
-                <img
-                  class="rendered-preview-image"
-                  :src="previewImageUrl"
-                  alt="Generated card image"
-                >
-              </div>
-              <div v-else class="rendered-preview-image-fallback" aria-label="No image generated">
-                <span class="rendered-preview-image-fallback-icon">No image</span>
-                <span class="rendered-preview-image-fallback-copy">
-                  The model did not generate an image for this card.
-                </span>
-              </div>
-            </article>
-
-            <article class="rendered-preview-card">
-              <p class="rendered-preview-label">Back</p>
-              <p
-                class="rendered-preview-value"
-                v-html="renderPreviewMarkup(previewCard.back)"
-              />
-            </article>
-
-            <article class="rendered-preview-card">
-              <p class="rendered-preview-label">Example</p>
-              <p
-                class="rendered-preview-value"
-                v-html="renderPreviewMarkup(previewCard.example)"
-              />
-            </article>
-
-            <article class="rendered-preview-card">
-              <p class="rendered-preview-label">Description</p>
-              <p
-                class="rendered-preview-value"
-                v-html="renderPreviewMarkup(previewCard.description)"
-              />
-            </article>
-          </section>
-
-          <div class="card-form">
-            <label class="field">
-              <span class="field-label">Front</span>
-              <input
-                v-model="previewCard.front"
-                class="field-input"
-                type="text"
-              >
-            </label>
-
-            <label class="field">
-              <span class="field-label">Image</span>
-              <input
-                v-model="previewCard.image"
-                class="field-input"
-                type="text"
-              >
-            </label>
-
-            <label class="field">
-              <span class="field-label">Back</span>
-              <textarea
-                v-model="previewCard.back"
-                class="field-input field-textarea"
-                rows="3"
-              />
-            </label>
-
-            <label class="field">
-              <span class="field-label">Example</span>
-              <textarea
-                v-model="previewCard.example"
-                class="field-input field-textarea"
-                rows="4"
-              />
-            </label>
-
-            <label class="field">
-              <span class="field-label">Description</span>
-              <textarea
-                v-model="previewCard.description"
-                class="field-input field-textarea"
-                rows="3"
-              />
-            </label>
-
-            <label class="field">
-              <span class="field-label">Deck</span>
-              <select
-                v-model="previewCard.deck"
-                class="field-input"
-              >
-                <option
-                  v-for="deck in ALLOWED_DECKS"
-                  :key="deck"
-                  :value="deck"
-                >
-                  {{ deck }}
-                </option>
-              </select>
-            </label>
-
-            <label class="field">
-              <span class="field-label">Tags</span>
-              <input
-                v-model="previewCard.tags"
-                class="field-input"
-                type="text"
-              >
-            </label>
-          </div>
-
-          <button
-            class="preview-action preview-action--enabled"
-            type="button"
-            :disabled="isAddingToAnki"
-            @click="addReviewedCardToAnki"
-          >
-            {{ isAddingToAnki ? 'Adding to Anki...' : 'Add to Anki' }}
-          </button>
-          <p
-            v-if="addToAnkiStatus"
-            :class="['status-message', `status-message--${addToAnkiTone}`]"
-            role="status"
-          >
-            {{ addToAnkiStatus }}
-          </p>
-        </template>
-
-        <template v-else>
-          <p class="preview-eyebrow">Generated card</p>
-          <h2 class="preview-title">No generated card yet</h2>
-          <p class="preview-copy">
-            Enter a word and click Generate to preview the card before adding it
-            to Anki.
-          </p>
-          <button class="preview-action" type="button" disabled>
-            Add to Anki
-          </button>
-        </template>
+        <div class="panel panel--prompt">
+          <p class="panel-label">Prompt Settings</p>
+          <div class="placeholder-box">System prompt editor and reset action</div>
+        </div>
       </section>
     </div>
   </main>
@@ -393,283 +37,81 @@ async function addReviewedCardToAnki() {
 <style scoped lang="scss">
 .page {
   min-height: 100vh;
-  display: grid;
-  place-items: center;
   padding: 2rem;
+  background:
+    radial-gradient(circle at top, var(--color-bg-soft) 0, var(--color-bg) 38%),
+    linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-subtle) 100%);
 }
 
 .shell {
-  width: min(100%, 42rem);
+  width: min(100%, 76rem);
+  margin: 0 auto;
 }
 
-.hero {
-  text-align: center;
-}
-
-.title {
-  margin: 0;
-  font-size: clamp(2.5rem, 7vw, 4.5rem);
-  line-height: 1;
-}
-
-.subtitle {
-  margin: 1rem 0 0;
-  font-size: 1.125rem;
-  line-height: 1.6;
-  color: #4b5563;
-}
-
-.input-panel {
-  margin-top: 2.5rem;
-}
-
-.input-label,
-.field-label {
-  display: block;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-.input-label {
-  margin-bottom: 0.75rem;
-}
-
-.input-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.75rem;
-}
-
-.utility-row {
-  margin-top: 0.75rem;
-}
-
-.word-input,
-.generate-button,
-.secondary-button,
-.field-input {
-  border-radius: 0.9rem;
-  border: 1px solid #d1d5db;
-  font: inherit;
-}
-
-.word-input,
-.field-input {
-  width: 100%;
-  padding: 0.95rem 1rem;
-  background: #fff;
-  color: #111827;
-
-  &::placeholder {
-    color: #9ca3af;
-  }
-
-  &:focus {
-    outline: 2px solid #111827;
-    outline-offset: 2px;
-  }
-}
-
-.generate-button {
-  padding: 0.95rem 1.25rem;
-  background: #111827;
-  color: #fff;
-  cursor: pointer;
-
-  &:hover {
-    background: #1f2937;
-  }
-
-  &:disabled {
-    background: #9ca3af;
-    cursor: wait;
-  }
-}
-
-.secondary-button {
-  padding: 0.75rem 1rem;
-  background: #fff;
-  color: #111827;
-  cursor: pointer;
-
-  &:hover {
-    background: #f3f4f6;
-  }
-
-  &:disabled {
-    color: #6b7280;
-    cursor: wait;
-  }
-}
-
-.error-message {
-  margin: 0.75rem 0 0;
-  color: #b91c1c;
-}
-
-.status-message {
-  margin: 0.75rem 0 0;
-}
-
-.status-message--success {
-  color: #047857;
-}
-
-.status-message--error {
-  color: #b91c1c;
-}
-
-.status-message--warning {
-  color: #b45309;
-}
-
-.preview-panel {
-  margin-top: 1.5rem;
-  padding: 1.5rem;
-  border: 1px solid #e5e7eb;
+.panel {
+  border: 2px dashed var(--color-border);
   border-radius: 1.25rem;
-  background: #f9fafb;
+  background: var(--color-bg-elevated);
+  backdrop-filter: blur(8px);
+  padding: 1.25rem;
 }
 
-.preview-eyebrow {
+.panel--hero {
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+.eyebrow,
+.panel-label {
   margin: 0;
   font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #6b7280;
+  color: var(--color-text-soft);
 }
 
-.preview-title {
+.title {
   margin: 0.5rem 0 0;
-  font-size: 1.5rem;
-  color: #111827;
+  font-size: clamp(2.5rem, 6vw, 4.25rem);
+  line-height: 1;
+  color: var(--color-text);
 }
 
-.preview-copy {
-  margin: 0.75rem 0 0;
+.subtitle {
+  max-width: 42rem;
+  margin: 0.85rem auto 0;
   line-height: 1.7;
-  color: #4b5563;
+  color: var(--color-text-muted);
 }
 
-.card-form {
+.grid {
   display: grid;
   gap: 1rem;
   margin-top: 1.5rem;
 }
 
-.rendered-preview {
+.placeholder-box {
+  margin-top: 0.75rem;
+  min-height: 8rem;
   display: grid;
-  gap: 0.75rem;
-  margin-top: 1.25rem;
-}
-
-.rendered-preview-card {
+  place-items: center;
+  text-align: center;
   padding: 1rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border-soft);
   border-radius: 1rem;
-  background: #fff;
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
 }
 
-.rendered-preview-label {
-  margin: 0 0 0.35rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #6b7280;
-}
-
-.rendered-preview-value {
-  margin: 0;
-  line-height: 1.7;
-  color: #111827;
-}
-
-.rendered-preview-value--front {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.rendered-preview-image-frame {
-  overflow: hidden;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.9rem;
-  background: #f9fafb;
-}
-
-.rendered-preview-image {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.rendered-preview-image-fallback {
-  display: grid;
-  gap: 0.35rem;
-  align-items: center;
-  padding: 1rem;
-  border: 1px dashed #d1d5db;
-  border-radius: 0.9rem;
-  background: #f9fafb;
-  color: #6b7280;
-}
-
-.rendered-preview-image-fallback-icon {
-  font-weight: 700;
-  color: #374151;
-}
-
-.rendered-preview-image-fallback-copy {
-  line-height: 1.5;
-}
-
-.field {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.field-textarea {
-  min-height: 7rem;
-  resize: vertical;
-}
-
-.preview-action {
-  margin-top: 1.25rem;
-  padding: 0.9rem 1.2rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.9rem;
-  background: #e5e7eb;
-  color: #6b7280;
-  font: inherit;
-  cursor: not-allowed;
-}
-
-.preview-action--enabled {
-  background: #111827;
-  border-color: #111827;
-  color: #fff;
-  cursor: pointer;
-
-  &:hover {
-    background: #1f2937;
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
   }
 
-  &:disabled {
-    background: #9ca3af;
-    border-color: #9ca3af;
-    cursor: wait;
-  }
-}
-
-@media (max-width: 640px) {
-  .input-row {
-    grid-template-columns: 1fr;
-  }
-
-  .generate-button {
-    width: 100%;
+  .panel--hero,
+  .panel--editor {
+    grid-column: 1 / -1;
   }
 }
 </style>
