@@ -1,34 +1,61 @@
+<script setup lang="ts">
+type TabName = 'Generate' | 'Cards' | 'Prompt'
+
+const tabs: TabName[] = ['Generate', 'Cards', 'Prompt']
+const activeTab = ref<TabName>('Generate')
+</script>
+
 <template>
   <main class="page">
     <div class="shell">
-      <header class="panel panel--hero">
+      <header class="hero">
         <p class="eyebrow">UI Foundation</p>
         <h1 class="title">AnkiFlow</h1>
         <p class="subtitle">
-          A simple layout for browsing, editing, prompting, and reviewing cards.
+          A tabbed workspace for generating, browsing, and configuring cards.
         </p>
       </header>
 
-      <section class="grid">
-        <div class="panel panel--input">
-          <p class="panel-label">Input Area</p>
-          <div class="placeholder-box">Word input and generate action</div>
-        </div>
+      <nav class="tabs" aria-label="Primary">
+        <button
+          v-for="tab in tabs"
+          :key="tab"
+          class="tab"
+          :class="{ 'tab--active': activeTab === tab }"
+          type="button"
+          @click="activeTab = tab"
+        >
+          {{ tab }}
+        </button>
+      </nav>
 
-        <div class="panel panel--browser">
-          <p class="panel-label">Card Browser</p>
-          <div class="placeholder-box">List of current cards</div>
-        </div>
+      <section class="workspace" aria-label="Workspace">
+        <template v-if="activeTab === 'Generate'">
+          <section class="panel panel--generate">
+            <div class="panel-block">
+              <p class="panel-label">Word Input</p>
+              <div class="placeholder-box">Enter a word and generate a card</div>
+            </div>
 
-        <div class="panel panel--editor">
-          <p class="panel-label">Card Editor</p>
-          <div class="placeholder-box">Rendered preview and editable card form</div>
-        </div>
+            <div class="panel-block">
+              <p class="panel-label">Card Editor</p>
+              <div class="placeholder-box">Rendered preview and editable card form</div>
+            </div>
+          </section>
+        </template>
 
-        <div class="panel panel--prompt">
-          <p class="panel-label">Prompt Settings</p>
-          <div class="placeholder-box">System prompt editor and reset action</div>
-        </div>
+        <template v-else-if="activeTab === 'Cards'">
+          <CurrentCardsPanel />
+        </template>
+
+        <template v-else>
+          <section class="panel panel--prompt">
+            <p class="panel-label">Prompt Settings</p>
+            <div class="placeholder-box">
+              System prompt editor and reset action
+            </div>
+          </section>
+        </template>
       </section>
     </div>
   </main>
@@ -48,21 +75,11 @@
   margin: 0 auto;
 }
 
-.panel {
-  border: 2px dashed var(--color-border);
-  border-radius: 1.25rem;
-  background: var(--color-bg-elevated);
-  backdrop-filter: blur(8px);
-  padding: 1.25rem;
-}
-
-.panel--hero {
+.hero {
   text-align: center;
-  padding: 2rem 1.5rem;
 }
 
-.eyebrow,
-.panel-label {
+.eyebrow {
   margin: 0;
   font-size: 0.8rem;
   font-weight: 700;
@@ -85,15 +102,67 @@
   color: var(--color-text-muted);
 }
 
-.grid {
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1.25rem;
+  background: var(--color-bg-elevated);
+}
+
+.tab {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.8rem 1rem;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tab--active {
+  border-color: var(--color-border);
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
+}
+
+.workspace {
+  margin-top: 1rem;
+}
+
+.panel {
+  border: 1px solid var(--color-border);
+  border-radius: 1.25rem;
+  background: var(--color-bg-elevated);
+  backdrop-filter: blur(8px);
+  padding: 1.25rem;
+}
+
+.panel--generate {
   display: grid;
   gap: 1rem;
-  margin-top: 1.5rem;
+}
+
+.panel-block {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.panel-label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-soft);
 }
 
 .placeholder-box {
-  margin-top: 0.75rem;
-  min-height: 8rem;
+  min-height: 9rem;
   display: grid;
   place-items: center;
   text-align: center;
@@ -105,13 +174,8 @@
 }
 
 @media (min-width: 900px) {
-  .grid {
+  .panel--generate {
     grid-template-columns: 1fr 1fr;
-  }
-
-  .panel--hero,
-  .panel--editor {
-    grid-column: 1 / -1;
   }
 }
 </style>
