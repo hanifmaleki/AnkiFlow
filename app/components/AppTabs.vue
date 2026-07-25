@@ -1,23 +1,28 @@
 <script setup lang="ts">
-type TabName = 'Generate' | 'Cards' | 'Prompt'
+const tabs = [
+  { label: 'Generate', to: '/' },
+  { label: 'Cards', to: '/cards' },
+  { label: 'Prompt', to: '/prompt' }
+] as const
 
-const tabs: TabName[] = ['Generate', 'Cards', 'Prompt']
+const route = useRoute()
 
-const activeTab = defineModel<TabName>({ required: true })
+function isActive(to: string) {
+  return route.path === to
+}
 </script>
 
 <template>
   <nav class="nav" aria-label="Primary">
-    <button
+    <NuxtLink
       v-for="tab in tabs"
-      :key="tab"
+      :key="tab.to"
       class="tab"
-      :class="{ 'tab--active': activeTab === tab }"
-      type="button"
-      @click="activeTab = tab"
+      :class="{ 'tab--active': isActive(tab.to) }"
+      :to="tab.to"
     >
-      {{ tab }}
-    </button>
+      {{ tab.label }}
+    </NuxtLink>
   </nav>
 </template>
 
@@ -41,6 +46,7 @@ const activeTab = defineModel<TabName>({ required: true })
   color: var(--color-text-muted);
   font: inherit;
   font-weight: 700;
+  text-decoration: none;
   cursor: pointer;
 }
 
