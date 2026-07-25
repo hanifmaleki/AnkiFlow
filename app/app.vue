@@ -1,33 +1,14 @@
 <script setup lang="ts">
 type TabName = 'Generate' | 'Cards' | 'Prompt'
 
-const tabs: TabName[] = ['Generate', 'Cards', 'Prompt']
 const activeTab = ref<TabName>('Generate')
 </script>
 
 <template>
   <main class="page">
     <div class="shell">
-      <header class="hero">
-        <p class="eyebrow">UI Foundation</p>
-        <h1 class="title">AnkiFlow</h1>
-        <p class="subtitle">
-          A tabbed workspace for generating, browsing, and configuring cards.
-        </p>
-      </header>
-
-      <nav class="tabs" aria-label="Primary">
-        <button
-          v-for="tab in tabs"
-          :key="tab"
-          class="tab"
-          :class="{ 'tab--active': activeTab === tab }"
-          type="button"
-          @click="activeTab = tab"
-        >
-          {{ tab }}
-        </button>
-      </nav>
+      <AppHeader />
+      <AppTabs v-model="activeTab" />
 
       <section class="workspace" aria-label="Workspace">
         <template v-if="activeTab === 'Generate'">
@@ -73,61 +54,6 @@ const activeTab = ref<TabName>('Generate')
 .shell {
   width: min(100%, 76rem);
   margin: 0 auto;
-}
-
-.hero {
-  text-align: center;
-}
-
-.eyebrow {
-  margin: 0;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-text-soft);
-}
-
-.title {
-  margin: 0.5rem 0 0;
-  font-size: clamp(2.5rem, 6vw, 4.25rem);
-  line-height: 1;
-  color: var(--color-text);
-}
-
-.subtitle {
-  max-width: 42rem;
-  margin: 0.85rem auto 0;
-  line-height: 1.7;
-  color: var(--color-text-muted);
-}
-
-.tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1.75rem;
-  padding: 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 1.25rem;
-  background: var(--color-bg-elevated);
-}
-
-.tab {
-  border: 1px solid transparent;
-  border-radius: 999px;
-  padding: 0.8rem 1rem;
-  background: transparent;
-  color: var(--color-text-muted);
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.tab--active {
-  border-color: var(--color-border);
-  background: var(--color-bg-subtle);
-  color: var(--color-text);
 }
 
 .workspace {
