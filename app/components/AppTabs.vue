@@ -1,28 +1,31 @@
 <script setup lang="ts">
+const route = useRoute()
 const tabs = [
   { label: 'Generate', to: '/' },
   { label: 'Cards', to: '/cards' },
   { label: 'Prompt', to: '/prompt' }
 ] as const
-
-const route = useRoute()
+const { status } = useAnkiConnection()
 
 function isActive(to: string) {
   return route.path === to
-}
+} 
 </script>
 
 <template>
   <nav class="nav" aria-label="Primary">
-    <NuxtLink
-      v-for="tab in tabs"
-      :key="tab.to"
-      class="tab"
-      :class="{ 'tab--active': isActive(tab.to) }"
-      :to="tab.to"
-    >
-      {{ tab.label }}
-    </NuxtLink>
+    <div class="tabs-row">
+      <NuxtLink
+        v-for="tab in tabs"
+        :key="tab.to"
+        class="tab"
+        :class="{ 'tab--active': isActive(tab.to) }"
+        :to="tab.to">
+            {{ tab.label }}
+      </NuxtLink>
+    </div>
+
+    <AnkiConnectionStatusBadge :status="status" />
   </nav>
 </template>
 
@@ -36,6 +39,12 @@ function isActive(to: string) {
   border: 1px solid var(--color-border);
   border-radius: 1.25rem;
   background: var(--color-bg-elevated);
+}
+
+.tabs-row {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
 }
 
 .tab {

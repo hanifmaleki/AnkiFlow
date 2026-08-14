@@ -10,4 +10,7 @@
   --color-text-muted: #475569;
   --color-text-soft: #64748b;
   --color-accent: #111827;
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
 }
