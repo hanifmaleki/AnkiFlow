@@ -102,14 +102,12 @@ async function addReviewedCardToAnki() {
             placeholder="Enter a word"
             @keyup.enter="generatePreview"
           >
-          <button
-            class="generate-button"
-            type="button"
+          <AppButton
             :disabled="isGenerating"
             @click="generatePreview"
           >
             {{ isGenerating ? 'Generating...' : 'Generate' }}
-          </button>
+          </AppButton>
         </div>
         <p v-if="generateError" class="error-message" role="alert">
           {{ generateError }}
@@ -120,14 +118,14 @@ async function addReviewedCardToAnki() {
     <AppPanel label="Card Editor">
       <template v-if="previewCard">
         <CardEditorForm v-model="previewCard" />
-        <button
+        <AppButton
+          variant="secondary"
           class="preview-action preview-action--enabled"
-          type="button"
           :disabled="isAddingToAnki"
           @click="addReviewedCardToAnki"
         >
           {{ isAddingToAnki ? 'Adding to Anki...' : 'Add to Anki' }}
-        </button>
+        </AppButton>
         <p
           v-if="addToAnkiStatus"
           :class="['status-message', `status-message--${addToAnkiTone}`]"

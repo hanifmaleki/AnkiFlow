@@ -11,17 +11,17 @@ const lastPrompt = ref('It will be prompted to generate a card for the word "exa
                     :rows="12"/>
 
     <div class="prompt-actions">
-      <button class="prompt-action" type="button">
-        Load latest
-        </button>
-
-        <button class="prompt-action" type="button">
+      <AppButton variant="secondary" @click="lastPrompt = ''">
+          Load Last
+        </AppButton>
+        
+        <AppButton variant="secondary" @click="lastPrompt = ''">
           Reset
-        </button>
+        </AppButton>
 
-        <button class="prompt-action" type="button">
+        <AppButton variant="secondary">
           Save
-        </button>
+        </AppButton>
     </div>
 
   </section>
@@ -36,24 +36,15 @@ const lastPrompt = ref('It will be prompted to generate a card for the word "exa
   padding: 1.25rem;
 }
 
-.panel-label {
-  margin: 0;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-text-soft);
-}
+.prompt-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
 
-.placeholder-box {
-  min-height: 9rem;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  padding: 1rem;
-  border: 1px solid var(--color-border-soft);
-  border-radius: 1rem;
-  background: var(--color-bg-subtle);
-  color: var(--color-text-muted);
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 </style>
