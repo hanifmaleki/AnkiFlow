@@ -10,11 +10,15 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "drizzle-orm": "^0.45.2",
     "nuxt": "^4.4.2",
+    "pg": "^8.23.0",
     "vue": "^3.5.30",
     "vue-router": "^5.0.3"
   },
   "devDependencies": {
+    "@types/pg": "^8.21.0",
+    "drizzle-kit": "^0.31.10",
     "sass": "^1.99.0"
   }
 }
