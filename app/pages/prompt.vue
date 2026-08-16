@@ -1,9 +1,29 @@
+<script setup lang="ts">
+import HtmlFieldInput from '@/components/HtmlFieldInput'
+
+const lastPrompt = ref('It will be prompted to generate a card for the word "example".')
+</script>
 <template>
   <section class="panel panel--prompt">
-    <p class="panel-label">Prompt Settings</p>
-    <div class="placeholder-box">
-      System prompt editor and reset action
+    <HtmlFieldInput v-model="lastPrompt" 
+                    label="System Prompt"
+                    multiline
+                    :rows="12"/>
+
+    <div class="prompt-actions">
+      <button class="prompt-action" type="button">
+        Load latest
+        </button>
+
+        <button class="prompt-action" type="button">
+          Reset
+        </button>
+
+        <button class="prompt-action" type="button">
+          Save
+        </button>
     </div>
+
   </section>
 </template>
 
