@@ -2,6 +2,14 @@
 
 This file records meaningful project changes as the work progresses.
 
+## 2026-08-16
+
+### Persistence direction
+
+- Chose Postgres plus a lightweight ORM as the next data layer direction
+- Planned the first database work around versioned prompts and timestamps
+- Added a persistence foundation phase to the project plan
+
 ## 2026-04-12
 
 ### Shared German card schema
