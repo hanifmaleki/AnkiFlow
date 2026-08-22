@@ -30,7 +30,7 @@ The project has implemented Phase 8's Gemini-backed generation flow and the shar
 
 The next implementation step is:
 
-- Verify the German preview and add-to-Anki flow end to end with a real API key
+- Start the persistence foundation with a local Postgres database and ORM setup
 
 ## Environment
 
@@ -41,6 +41,8 @@ GEMINI_API_KEY=your-gemini-api-key-here
 ```
 
 Nuxt reads this through `runtimeConfig.geminiApiKey`.
+
+The next major product step is adding versioned prompt storage and preparing the app for future card persistence.
 
 ## Goals
 

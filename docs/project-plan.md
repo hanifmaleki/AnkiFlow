@@ -301,11 +301,45 @@ Goal: rebuild the UI in small learnable steps.
 
 ---
 
+## Phase 17: Persistence Foundation
+
+Goal: add a database layer for versioned prompts and future card data.
+
+- [ ] Choose the database stack.
+- [ ] Set up a local development database.
+- [ ] Add ORM and migration tooling.
+- [ ] Create the first prompt version table.
+- [ ] Store `appliedAt` and other timestamp fields.
+- [ ] Add a simple read/write path for prompt versions.
+
+## Definition of done
+
+- The app can store and load prompt versions.
+- The database setup is ready to grow with cards and study features.
+
+---
+
+## Phase 18: Prompt Versioning UI
+
+Goal: edit and reuse prompts from the app.
+
+- [ ] Show the current prompt in the UI.
+- [ ] Allow editing and saving a new prompt version.
+- [ ] Show the prompt history list.
+- [ ] Allow switching back to a previous prompt version.
+
+## Definition of done
+
+- The app can manage prompt versions from the UI.
+- Older prompts remain available for reuse.
+
+---
+
 ## Immediate Next Step
 
 The next step should be:
 
-- [ ] Build the UI foundation as a simple placeholder layout.
+- [ ] Start the persistence foundation with a local Postgres database and ORM setup.
 
 ---
 

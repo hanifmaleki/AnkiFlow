@@ -102,14 +102,12 @@ async function addReviewedCardToAnki() {
             placeholder="Enter a word"
             @keyup.enter="generatePreview"
           >
-          <button
-            class="generate-button"
-            type="button"
+          <AppButton
             :disabled="isGenerating"
             @click="generatePreview"
           >
             {{ isGenerating ? 'Generating...' : 'Generate' }}
-          </button>
+          </AppButton>
         </div>
         <p v-if="generateError" class="error-message" role="alert">
           {{ generateError }}
@@ -120,14 +118,12 @@ async function addReviewedCardToAnki() {
     <AppPanel label="Card Editor">
       <template v-if="previewCard">
         <CardEditorForm v-model="previewCard" />
-        <button
-          class="preview-action preview-action--enabled"
-          type="button"
+        <AppButton
+          variant="secondary"
           :disabled="isAddingToAnki"
-          @click="addReviewedCardToAnki"
-        >
+          @click="addReviewedCardToAnki">
           {{ isAddingToAnki ? 'Adding to Anki...' : 'Add to Anki' }}
-        </button>
+        </AppButton>
         <p
           v-if="addToAnkiStatus"
           :class="['status-message', `status-message--${addToAnkiTone}`]"
@@ -140,9 +136,11 @@ async function addReviewedCardToAnki() {
         <div class="placeholder-box">
           Enter a word and click Generate to preview the card.
         </div>
-        <button class="preview-action" type="button" disabled>
+        <AppButton variant="secondary" 
+                   type="button"
+                   disabled>
           Add to Anki
-        </button>
+        </AppButton>
       </template>
     </AppPanel>
   </section>
@@ -169,15 +167,10 @@ async function addReviewedCardToAnki() {
   gap: 0.75rem;
 }
 
-.word-input,
-.generate-button,
-.preview-action {
+.word-input {
   border-radius: 0.9rem;
   border: 1px solid var(--color-border);
   font: inherit;
-}
-
-.word-input {
   width: 100%;
   padding: 0.95rem 1rem;
   background: var(--color-bg);
@@ -190,22 +183,6 @@ async function addReviewedCardToAnki() {
   &:focus {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
-  }
-}
-
-.generate-button {
-  padding: 0.95rem 1.25rem;
-  background: var(--color-accent);
-  color: #fff;
-  cursor: pointer;
-
-  &:hover {
-    background: #1f2937;
-  }
-
-  &:disabled {
-    background: #9ca3af;
-    cursor: wait;
   }
 }
 
@@ -224,31 +201,6 @@ async function addReviewedCardToAnki() {
   border-radius: 1rem;
   background: var(--color-bg-subtle);
   color: var(--color-text-muted);
-}
-
-.preview-action {
-  margin-top: 1.25rem;
-  padding: 0.9rem 1.2rem;
-  background: #e5e7eb;
-  color: #6b7280;
-  cursor: not-allowed;
-}
-
-.preview-action--enabled {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: #fff;
-  cursor: pointer;
-
-  &:hover {
-    background: #1f2937;
-  }
-
-  &:disabled {
-    background: #9ca3af;
-    border-color: #9ca3af;
-    cursor: wait;
-  }
 }
 
 .status-message {
@@ -270,10 +222,6 @@ async function addReviewedCardToAnki() {
 @media (max-width: 640px) {
   .input-row {
     grid-template-columns: 1fr;
-  }
-
-  .generate-button {
-    width: 100%;
   }
 }
 </style>

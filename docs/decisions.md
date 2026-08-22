@@ -24,9 +24,16 @@ This file records important technical and product choices.
 - Decision: Use a review-before-add workflow.
 - Reason: Generated content should be visible and editable before it reaches Anki.
 
+### Persistence Direction
+
+- Decision: Start with Postgres and a lightweight ORM, using a local development database first.
+- Reason: The app is heading toward structured persistence for versioned prompts, cards, and study data, and Postgres fits that path well while still supporting a future cloud deployment.
+
 ## Open Decisions
 
 - Initial target language
 - Initial Anki deck name
 - Initial note model and field mapping
 - LLM provider
+- ORM choice for persistence
+- Local vs hosted database provider

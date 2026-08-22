@@ -57,3 +57,11 @@ That means:
 - Complex state management
 - Background jobs
 - Multi-user support
+
+## Next Persistence Direction
+
+- Use Postgres for structured app data.
+- Use a lightweight ORM and migrations so schema changes stay manageable.
+- Start with a local development database.
+- Keep the schema and connection-string shape compatible with a future hosted Postgres instance.
+- Store versioned prompts first, then expand to cards and study data.
