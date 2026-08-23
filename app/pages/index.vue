@@ -171,7 +171,6 @@ async function addReviewedCardToAnki() {
   border-radius: 0.9rem;
   border: 1px solid var(--color-border);
   font: inherit;
-  width: 100%;
   padding: 0.95rem 1rem;
   background: var(--color-bg);
   color: var(--color-text);
