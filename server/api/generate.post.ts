@@ -1,3 +1,4 @@
+import { PromptService } from '../services/promptService';
 import { generateCardWithGemini } from '../utils/llm'
 
 type GenerateCardRequest = {
@@ -8,9 +9,17 @@ export default defineEventHandler(async (event) => {
   const body = await readBody<GenerateCardRequest>(event)
   const word = body?.word?.trim() || 'serendipity'
   const runtimeConfig = useRuntimeConfig(event)
+  const systemPrompt = await new PromptService().getLatestPrompt('system')
+
+  if (!systemPrompt) {
+    throw createError({
+      statusCode: 503,
+      statusMessage: 'System prompt is not configured.',
+    })
+  }
 
   try {
-    return await generateCardWithGemini(word, runtimeConfig.geminiApiKey)
+    return await generateCardWithGemini(word, runtimeConfig.geminiApiKey, systemPrompt.prompt)
   } catch (error) {
     const message = error instanceof Error
       ? error.message
