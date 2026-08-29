@@ -8,6 +8,13 @@
       "when": 1786875477032,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788027089893,
+      "tag": "0001_wise_wonder_man",
+      "breakpoints": true
     }
   ]
 }
