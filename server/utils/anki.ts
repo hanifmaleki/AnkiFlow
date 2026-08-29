@@ -1,7 +1,7 @@
 const ANKI_CONNECT_URL = 'http://127.0.0.1:8765'
 const ANKI_CONNECT_VERSION = 5
 
-type AnkiConnectAction = 'version' | 'deckNames' | 'addNote' | 'findNotes'
+type AnkiConnectAction = 'version' | 'deckNames' | 'addNote' | 'findNotes' | 'deckNamesAndIds' | 'createDeck'
 
 type AnkiConnectRequest<TParams> = {
   action: AnkiConnectAction
