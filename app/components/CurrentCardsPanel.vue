@@ -16,28 +16,7 @@ const cards: CardSummary[] = [
 <template>
   <section class="panel">
     <p class="panel-label">Card Browser</p>
-    <h2 class="panel-title">Current Cards</h2>
-    <p class="panel-copy">
-      This panel will later list your saved cards and let you open one for editing or regenerating.
-    </p>
-
-    <div class="list-head">
-      <span>Front</span>
-      <span>Deck</span>
-      <span>Tags</span>
-    </div>
-
-    <ul class="card-list">
-      <li
-        v-for="card in cards"
-        :key="card.id"
-        class="card-row"
-      >
-        <strong class="card-front">{{ card.front }}</strong>
-        <span class="card-deck">{{ card.deck }}</span>
-        <span class="card-tags">{{ card.tags }}</span>
-      </li>
-    </ul>
+    
   </section>
 </template>
 

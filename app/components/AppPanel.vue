@@ -1,12 +1,21 @@
 <script setup lang="ts">
 defineProps<{
-  label?: string
+  label?: string,
+  title?: string,
 }>()
 </script>
 
 <template>
   <div class="panel">
-    <p v-if="label" class="panel-label">{{ label }}</p>
+    <div v-if="label || title || $slots.header" class="panel-header">
+      <div>
+        <p v-if="label" class="panel-label">{{ label }}</p>
+        <h2 v-if="title" class="panel-title">{{ title }}</h2> 
+      </div>
+
+      <slot name="header" />
+    </div>
+
     <slot />
   </div>
 </template>
@@ -30,5 +39,11 @@ defineProps<{
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-text-soft);
+}
+
+.panel-title {
+  margin: 0.2rem 0 0;
+  font-size: 1.3rem;
+  color: var(--color-text);
 }
 </style>
