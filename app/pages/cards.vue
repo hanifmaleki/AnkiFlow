@@ -1,10 +1,23 @@
+<script setup lang="ts">
+import type {Deck} from '~~/server/db/entities/decks'
+
+const { data: decks, pendingDecks, decksApierror } = await useFetch<Deck[]>('api/decks')
+</script>
+
 <template>
   <section aria-label="Cards workspace">
       <AppPanel title="Cards">
         <div class="cards-layout">
           <div class="decks-pane">
             <div class="decks-header">decs-header</div>
-            <div class="deck-list">decks-list</div>
+            <div class="deck-list">
+                <p v-if="pendingDecks">Loading decks...</p>
+                <p v-else-if="decksApiError">Could not load decks.</p>
+
+                <p v-for="deck in decks">
+                    {{ deck.name }}
+                </p>
+            </div>
           </div>
 
           <div class="cards-pane">
