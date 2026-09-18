@@ -98,94 +98,62 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="panel panel--prompt">
-    <div class="prompt-header">
-      <div>
-        <p class="panel-label">Prompt Settings</p>
-        <h1 class="panel-title">System Prompt</h1>
+  <section>
+    <AppPanel label="Prompt Settings" title="System prompt" >
+      <template #header>
+        <p class="prompt-meta">
+          <span>Key: {{ promptKey }}</span>
+          <span>Version: {{ currentVersion ?? 'None' }}</span>
+        </p>
+      </template>
+
+      <div class="prompt-panel-content-container">
+        <HtmlFieldInput
+          v-model="systemPrompt"
+          label="Prompt"
+          multiline
+          :rows="30"
+        />
+
+        <div class="prompt-actions">
+          <AppButton
+            variant="secondary"
+            :disabled="isLoadingLatestPrompt || isSavingPrompt"
+            @click="loadLastPrompt"
+          >
+            {{ isLoadingLatestPrompt ? 'Loading...' : 'Load Last' }}
+          </AppButton>
+
+          <AppButton
+            variant="ghost"
+            :disabled="isSavingPrompt"
+            @click="resetPrompt"
+          >
+            Reset
+          </AppButton>
+
+          <AppButton
+            :disabled="isSavingPrompt"
+            @click="savePrompt"
+          >
+            {{ isSavingPrompt ? 'Saving...' : 'Save' }}
+          </AppButton>
+        </div>
+
+        <p
+          v-if="promptMessage"
+          class="prompt-message"
+          :class="`prompt-message--${promptTone}`"
+          role="status"
+        >
+          {{ promptMessage }}
+        </p>
       </div>
-
-      <p class="prompt-meta">
-        <span>Key: {{ promptKey }}</span>
-        <span>Version: {{ currentVersion ?? 'None' }}</span>
-      </p>
-    </div>
-
-    <HtmlFieldInput
-      v-model="systemPrompt"
-      label="System Prompt"
-      multiline
-      :rows="30"
-    />
-
-    <div class="prompt-actions">
-      <AppButton
-        variant="secondary"
-        :disabled="isLoadingLatestPrompt || isSavingPrompt"
-        @click="loadLastPrompt"
-      >
-        {{ isLoadingLatestPrompt ? 'Loading...' : 'Load Last' }}
-      </AppButton>
-
-      <AppButton
-        variant="ghost"
-        :disabled="isSavingPrompt"
-        @click="resetPrompt"
-      >
-        Reset
-      </AppButton>
-
-      <AppButton
-        :disabled="isSavingPrompt"
-        @click="savePrompt"
-      >
-        {{ isSavingPrompt ? 'Saving...' : 'Save' }}
-      </AppButton>
-    </div>
-
-    <p
-      v-if="promptMessage"
-      class="prompt-message"
-      :class="`prompt-message--${promptTone}`"
-      role="status"
-    >
-      {{ promptMessage }}
-    </p>
+    </AppPanel>
   </section>
 </template>
 
 <style scoped lang="scss">
-.panel {
-  border: 1px solid var(--color-border);
-  border-radius: 1.25rem;
-  background: var(--color-bg-elevated);
-  backdrop-filter: blur(8px);
-  padding: 1.25rem;
-}
-
-.prompt-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.panel-label {
-  margin: 0;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-text-soft);
-}
-
-.panel-title {
-  margin: 0.2rem 0 0;
-  font-size: 1.3rem;
-  color: var(--color-text);
-}
-
 .prompt-meta {
   margin: 0;
   display: grid;
@@ -193,6 +161,10 @@ onMounted(() => {
   text-align: right;
   font-size: 0.9rem;
   color: var(--color-text-muted);
+}
+
+.prompt-panel-content-container {
+  margin: 2rem auto;
 }
 
 .prompt-actions {
@@ -221,10 +193,6 @@ onMounted(() => {
 }
 
 @media (max-width: 640px) {
-  .prompt-header {
-    flex-direction: column;
-  }
-
   .prompt-meta {
     text-align: left;
   }
