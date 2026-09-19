@@ -10,7 +10,7 @@ export const cards = pgTable('cards', {
 
     front: text('front').notNull(),
     back: text('back').notNull(),
-    image: text('back').notNull(),
+    image: text('image').notNull(),
     example: text('example').notNull(),
     description: text('description').notNull(),
     tags: text('tag').array().notNull().default([]),
@@ -25,4 +25,6 @@ export const cards = pgTable('cards', {
     promptId: integer('prompt_id')
         .references(() => prompts.id),
 })
-    
+
+export type Card = typeof cards.$inferSelect
+export type CardInput = typeof cards.$inferInsert
