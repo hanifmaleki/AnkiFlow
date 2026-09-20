@@ -58,16 +58,53 @@ export class CardService {
     }
 
     async syncToAnki(): Promise<void> {
-        throw createError({
-            statusCode: 501,
-            statusMessage: 'Card synchronization to Anki is not implemented yet.',
-        })
+        const localCards = await db
+            .select({ card: cards, deck: decks })
+            .from(cards)
+            .innerJoin(decks, eq(cards.deckId, decks.id))
+
+        const syncedAt = new Date()
+
+        for (const { card, deck } of localCards) {
+            const changedLocally = 
+                card.lastSyncedAt == null || card.updatedAt > card.lastSyncedAt
+
+            if (!changedLocally) {
+                continue
+            }
+
+            const remoteCard = {
+                deckNAme: deck.name,
+                modelName: card.ankiModelName,
+                front: card.front,
+                back: card.back,
+                image: card.image,
+                example: card.example,
+                description: card.description,
+                tags: card.tags,
+            }
+
+            const remote = card.ankiNoteId == null
+                ? await this.gateway.create(remoteCard)
+                : await this.gateway.update(card.ankiNoteId, remoteCard)
+
+            await db
+                .update(cards)
+                .set({
+                    ankiNoteId: remote.id,
+                    lastSyncedAt: syncedAt,
+                })
+                .where(eq(card.id, card.id))
+        }
     }
 
     async syncFromAnki(): Promise<void> {
-        throw createError({
-            statusCode: 501,
-            statusMessage: 'Card synchronization from Anki is not implemented yet.',
-        })
+        const [remoteCards, localCards, localDecks] = await Promise.all([
+            this.gateway.list(),
+            db.select().from(cards),
+            db.select().from(decks),
+        ])
+
+        const localByAnkiNoteId 
     }
 }
