@@ -1,6 +1,7 @@
 import { AnkiConnectCardGateway, AnkiConnectDeckGateway } from '../services/ankiGatewayService'
 import { CardService } from '../services/cardService'
 import { DeckService } from '../services/deckService'
+import type { SynchronizationResponse } from '../../types/synchronization'
 
 export default defineEventHandler(async () => {
   try {
@@ -12,7 +13,7 @@ export default defineEventHandler(async () => {
     const decks = await new DeckService().syncFromAnki(deckGateway)
     const cards = await new CardService().syncWithAnki(cardGateway)
 
-    return { ok: true, stats: { decks, cards } }
+    return { ok: true, stats: { decks, cards } } satisfies SynchronizationResponse
   } catch (error) {
     throw createError({
       statusCode: 502,

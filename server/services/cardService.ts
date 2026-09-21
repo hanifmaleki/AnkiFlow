@@ -3,15 +3,9 @@ import { db } from '../db/client'
 import { cards, type Card, type CardInput } from '../db/entities/cards'
 import { decks } from '../db/entities/decks'
 import type { AnkiCardGateway } from './ankiGatewayService'
+import type { SynchronizationStatus } from '../../types/synchronization'
 
-export type CardSyncStats = {
-    importedFromAnki: number
-    updatedFromAnki: number
-    pushedToAnki: number
-    skippedUnsupported: number
-    skippedLocalChanges: number
-    skippedUnmappedDeck: number
-}
+export type CardSyncStats = SynchronizationStatus['cards']
 
 function now(): Date {
     return new Date()

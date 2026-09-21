@@ -5,28 +5,11 @@ const tabs = [
   { label: 'Cards', to: '/cards' },
   { label: 'Prompt', to: '/prompt' }
 ] as const
+import type { SynchronizationResponse } from '../../types/synchronization'
+
 const { ankiConnected, status, refreshAnkiConnection } = useAnkiConnection()
 const syncing = ref(false)
-type SyncResponse = {
-  ok: true
-  stats: {
-    decks: {
-      importedFromAnki: number
-      createdInAnki: number
-      renamedFromAnki: number
-      linkedToAnki: number
-    }
-    cards: {
-      importedFromAnki: number
-      updatedFromAnki: number
-      pushedToAnki: number
-      skippedUnsupported: number
-      skippedLocalChanges: number
-      skippedUnmappedDeck: number
-    }
-  }
-}
-const syncStats = ref<SyncResponse['stats'] | null>(null)
+const syncStats = ref<SynchronizationResponse['stats'] | null>(null)
 
 const syncLabel = computed(() => {
   if (syncing.value) return 'Syncing…'
@@ -39,7 +22,7 @@ async function sync() {
   syncing.value = true
 
   try {
-    const response = await $fetch<SyncResponse>('/api/sync', { method: 'POST' })
+    const response = await $fetch<SynchronizationResponse>('/api/sync', { method: 'POST' })
     syncStats.value = response.stats
     await refreshNuxtData('decks')
   } finally {

@@ -1,22 +1,7 @@
 <script setup lang="ts">
-type SyncStats = {
-  decks: {
-    importedFromAnki: number
-    createdInAnki: number
-    renamedFromAnki: number
-    linkedToAnki: number
-  }
-  cards: {
-    importedFromAnki: number
-    updatedFromAnki: number
-    pushedToAnki: number
-    skippedUnsupported: number
-    skippedLocalChanges: number
-    skippedUnmappedDeck: number
-  }
-}
+import type { SynchronizationStatus } from '../../types/synchronization'
 
-defineProps<{ stats: SyncStats }>()
+defineProps<{ stats: SynchronizationStatus }>()
 defineEmits<{ close: [] }>()
 </script>
 

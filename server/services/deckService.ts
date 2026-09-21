@@ -2,13 +2,9 @@ import { eq } from 'drizzle-orm'
 import { db } from '../db/client'
 import { decks, type Deck, DeckInput } from '../db/entities/decks'
 import { AnkiDeckGateway } from './ankiGatewayService'
+import type { SynchronizationStatus } from '../../types/synchronization'
 
-export type DeckSyncStats = {
-    importedFromAnki: number
-    createdInAnki: number
-    renamedFromAnki: number
-    linkedToAnki: number
-}
+export type DeckSyncStats = SynchronizationStatus['decks']
 
 function validateInputDeck(deck: DeckInput): string {
     const name = deck?.name?.trim()
