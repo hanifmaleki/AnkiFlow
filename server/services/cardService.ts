@@ -4,6 +4,15 @@ import { cards, type Card, type CardInput } from '../db/entities/cards'
 import { decks } from '../db/entities/decks'
 import type { AnkiCardGateway } from './ankiGatewayService'
 
+export type CardSyncStats = {
+    importedFromAnki: number
+    updatedFromAnki: number
+    pushedToAnki: number
+    skippedUnsupported: number
+    skippedLocalChanges: number
+    skippedUnmappedDeck: number
+}
+
 function now(): Date {
     return new Date()
 }
@@ -61,18 +70,21 @@ export class CardService {
 
     // The UI needs one sync action. Pull first, then push local changes and
     // conflicts so that the documented local-wins rule is applied.
-    async syncWithAnki(gateway: AnkiCardGateway): Promise<void> {
-        await this.syncFromAnki(gateway)
-        await this.syncToAnki(gateway)
+    async syncWithAnki(gateway: AnkiCardGateway): Promise<CardSyncStats> {
+        const imported = await this.syncFromAnki(gateway)
+        const pushedToAnki = await this.syncToAnki(gateway)
+
+        return { ...imported, pushedToAnki }
     }
 
-    async syncToAnki(gateway: AnkiCardGateway): Promise<void> {
+    async syncToAnki(gateway: AnkiCardGateway): Promise<number> {
         const localCards = await db
             .select({ card: cards, deck: decks })
             .from(cards)
             .innerJoin(decks, eq(cards.deckId, decks.id))
 
         const syncedAt = now()
+        let pushedToAnki = 0
 
         for (const { card, deck } of localCards) {
             const changedLocally =
@@ -94,14 +106,23 @@ export class CardService {
                     lastSyncedAt: syncedAt,
                 })
                 .where(eq(cards.id, card.id))
+
+            pushedToAnki += 1
         }
+
+        return pushedToAnki
     }
 
-    async syncFromAnki(gateway: AnkiCardGateway): Promise<void> {
+    async syncFromAnki(gateway: AnkiCardGateway): Promise<Omit<CardSyncStats, 'pushedToAnki'>> {
         const localDecks = await db.select().from(decks)
-        const remoteCards = await gateway.list(localDecks.map((deck) => deck.name))
+        const remote = await gateway.list(localDecks.map((deck) => deck.name))
+        const remoteCards = remote.cards
         const localCards = await db.select().from(cards)
         const syncedAt = now()
+        let importedFromAnki = 0
+        let updatedFromAnki = 0
+        let skippedLocalChanges = 0
+        let skippedUnmappedDeck = 0
 
         const localByAnkiNoteId = new Map(
             localCards
@@ -119,6 +140,7 @@ export class CardService {
 
             // Deck synchronization must occur before card synchronization.
             if (!deck) {
+                skippedUnmappedDeck += 1
                 continue
             }
 
@@ -139,6 +161,8 @@ export class CardService {
                     lastSyncedAt: syncedAt,
                 })
 
+                importedFromAnki += 1
+
                 continue
             }
 
@@ -148,6 +172,7 @@ export class CardService {
             // A local edit is pushed in syncToAnki(), which gives conflicts a
             // deterministic local-wins outcome.
             if (changedLocally) {
+                skippedLocalChanges += 1
                 continue
             }
 
@@ -166,6 +191,16 @@ export class CardService {
                     lastSyncedAt: syncedAt,
                 })
                 .where(eq(cards.id, local.id))
+
+            updatedFromAnki += 1
+        }
+
+        return {
+            importedFromAnki,
+            updatedFromAnki,
+            skippedUnsupported: remote.skippedUnsupported,
+            skippedLocalChanges,
+            skippedUnmappedDeck,
         }
     }
 }
