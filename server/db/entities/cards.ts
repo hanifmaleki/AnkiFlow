@@ -1,4 +1,4 @@
-import { bigint, pgTable, serial, text, timestamp, integer, uniqueIndex } from 'drizzle-orm/pg-core'
+import { bigint, index, integer, pgTable, serial, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 import { decks } from './decks'
 import { prompts } from './prompts'
 
@@ -24,7 +24,11 @@ export const cards = pgTable('cards', {
 
     promptId: integer('prompt_id')
         .references(() => prompts.id),
-})
+}, (table) => [
+    index('cards_deck_id_index').on(table.deckId),
+    uniqueIndex('cards_anki_note_id_unique').on(table.ankiNoteId),
+    index('cards_prompt_id_index').on(table.promptId),
+])
 
 export type Card = typeof cards.$inferSelect
 export type CardInput = typeof cards.$inferInsert

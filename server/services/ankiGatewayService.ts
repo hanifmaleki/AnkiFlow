@@ -1,6 +1,6 @@
 import { callAnkiConnect } from '../utils/anki'
-import { DeckInput } from '../db/entities/decks'
-import { Card } from '../db/entities/cards'
+import type { Card } from '../db/entities/cards'
+import type { DeckInput } from '../db/entities/decks'
 
 export type RemoteDeck = {
     id: number
@@ -8,6 +8,7 @@ export type RemoteDeck = {
     lastChangedAt: Date | null
 }
 
+// The normalized note shape that CardService receives from an Anki gateway.
 export type RemoteCard = {
     id: number
     ankiDeckId: number
@@ -21,6 +22,7 @@ export type RemoteCard = {
     updatedAt: Date | null
 }
 
+// Raw `notesInfo` data returned by AnkiConnect. It stays private to this file.
 type AnkiNoteInfo = {
     noteId: number
     modelName: string
@@ -30,22 +32,25 @@ type AnkiNoteInfo = {
     fields: Record<string, { value: string }>
 }
 
+// Raw `cardsInfo` data returned by AnkiConnect. A note needs this to identify
+// the deck in which its generated review card is placed.
 type AnkiCardInfo = {
     cardId: number
     note: number
     deckName: string
 }
 
-export interface AnkiDeckGateway { 
+export interface AnkiDeckGateway {
     list(): Promise<RemoteDeck[]>
     create(deck: DeckInput): Promise<RemoteDeck>
     update(id: number, deck: DeckInput): Promise<RemoteDeck>
 }
 
-export interface AnkiDeckGateway {
-    list(): Promise<RemoteCard[]>
+export interface AnkiCardGateway {
+    // The caller controls which local deck names may be imported.
+    list(deckNames: string[]): Promise<RemoteCard[]>
     create(card: Card, deckName: string): Promise<RemoteCard>
-    update(noteId: number, card: Card): Promise<RemoteCard>
+    update(noteId: number, card: Card, deckName: string): Promise<RemoteCard>
 }
 
 export class AnkiConnectDeckGateway implements AnkiDeckGateway {
@@ -60,7 +65,7 @@ export class AnkiConnectDeckGateway implements AnkiDeckGateway {
     }
 
     async create(deck: DeckInput): Promise<RemoteDeck> {
-        const id = await callAnkiConnect<number, { deck: string }>('createDeck', {deck: deck.name})
+        const id = await callAnkiConnect<number, { deck: string }>('createDeck', { deck: deck.name })
 
         return {
             id,
@@ -69,21 +74,32 @@ export class AnkiConnectDeckGateway implements AnkiDeckGateway {
         }
     }
 
-    async update(id: number, deck: DeckInput) { 
+    async update(_id: number, _deck: DeckInput): Promise<RemoteDeck> {
         throw createError({
             statusCode: 501,
-            statusMessage: 'AnkiConnect does not support renaiming decks.'
+            statusMessage: 'AnkiConnect does not support renaming decks.',
         })
     }
 }
 
-export  class AnkiConnectCardGateway implements AnkiCardGateway {
-    async list: Promise<RemoteCard[]> {
-        // only import notes managed by AnkiFlow
-        const notes = await callAnkiConnect<AnkiNoteInfo[], { query: string }>(
-            'notesInfo',
-            { query: 'tag: ankiflow' },
+export class AnkiConnectCardGateway implements AnkiCardGateway {
+    async list(deckNames: string[]): Promise<RemoteCard[]> {
+        const uniqueDeckNames = [...new Set(deckNames)]
+
+        if (uniqueDeckNames.length === 0) {
+            return []
+        }
+
+        const notesByDeck = await Promise.all(
+            uniqueDeckNames.map((deckName) => callAnkiConnect<AnkiNoteInfo[], { query: string }>(
+                'notesInfo',
+                { query: `deck:"${deckName.replaceAll('"', '\\"')}"` },
+            )),
         )
+
+        const notes = [...new Map(
+            notesByDeck.flat().map((note) => [note.noteId, note]),
+        ).values()]
 
         return this.toRemoteCards(notes)
     }
@@ -100,14 +116,8 @@ export  class AnkiConnectCardGateway implements AnkiCardGateway {
             note: {
                 deckName,
                 modelName: card.ankiModelName,
-                fields: {
-                    Front: card.front,
-                    Image: card.image,
-                    Back: card.back,
-                    Example: card.example,
-                    Dexcription: card.description
-                },
-                tags: card.tags.length ? card.tags : ['ankiflow']
+                fields: this.toAnkiFields(card),
+                tags: card.tags,
             },
         })
 
@@ -118,106 +128,126 @@ export  class AnkiConnectCardGateway implements AnkiCardGateway {
         await callAnkiConnect<null, {
             note: {
                 id: number
-                fields; Record<string, steing>
-                tags: string[]
+                fields: Record<string, string>
             }
-        }>('updateNote', {
-            note:
+        }>('updateNoteFields', {
+            note: {
                 id: noteId,
-                fields: {
-                    Front: card.front,
-                    Image: card.image,
-                    Back: card.back,
-                    Example: card.example,
-                    Description: card.description,
-                },
-                tags:  cards.tags,
+                fields: this.toAnkiFields(card),
             },
         })
+
+        await callAnkiConnect<null, { note: number, tags: string[] }>(
+            'updateNoteTags',
+            { note: noteId, tags: card.tags },
+        )
 
         const [note] = await callAnkiConnect<AnkiNoteInfo[], { notes: number[] }>(
             'notesInfo',
             { notes: [noteId] },
         )
 
+        if (!note) {
+            throw createError({
+                statusCode: 404,
+                statusMessage: `Anki note ${noteId} was not found.`,
+            })
+        }
+
         await callAnkiConnect<null, { cards: number[], deck: string }>(
             'changeDeck',
-            { 
-                cards: notes.cards,
-                deck: deckName,
-            },
+            { cards: note.cards, deck: deckName },
         )
 
         return this.getByNoteId(noteId)
     }
 
-private async getByNoteId(noteId: number): Promise<RemteCard> {
-    const [note] = await callAnkiConnect<AnkiNoteInfo[], { notes: number[] }>(
-        'notesInfo',
-        {notes: [noteId] },
-    )
-
-    if (!note) {
-        throw createError({
-            statusCode: 404,
-            statusMEssage: `Anki note ${noteId} was not found.`,
-        })
+    private toAnkiFields(card: Card): Record<string, string> {
+        return {
+            Front: card.front,
+            Image: card.image,
+            Back: card.back,
+            Example: card.example,
+            Description: card.description,
+        }
     }
 
-    const [remoteCard] = await this.toRemoteCards([note])
+    private async getByNoteId(noteId: number): Promise<RemoteCard> {
+        const [note] = await callAnkiConnect<AnkiNoteInfo[], { notes: number[] }>(
+            'notesInfo',
+            { notes: [noteId] },
+        )
 
-    if (!remoteCard) {
-        throw createError({
-            statusCode: 422,
-            statusMessage: `Anki note ${noteId} could not be converted to a card.`,
-        })
+        if (!note) {
+            throw createError({
+                statusCode: 404,
+                statusMessage: `Anki note ${noteId} was not found.`,
+            })
+        }
+
+        const [remoteCard] = await this.toRemoteCards([note])
+
+        if (!remoteCard) {
+            throw createError({
+                statusCode: 422,
+                statusMessage: `Anki note ${noteId} does not have the fields required by AnkiFlow.`,
+            })
+        }
+
+        return remoteCard
     }
-
-    return remoteCard
-}
 
     private async toRemoteCards(notes: AnkiNoteInfo[]): Promise<RemoteCard[]> {
-        const cardIds = notes.flatMap(note => note.cards)
+        const cardIds = notes.flatMap((note) => note.cards)
 
         if (cardIds.length === 0) {
             return []
         }
 
         const [cardInfos, deckNamesAndIds] = await Promise.all([
-            callAnkConnect<AnkiConnectInfo[], { cards: number[] }>(
-                'cardInfo',
-                { cards: cardIds },
-            ),
+            callAnkiConnect<AnkiCardInfo[], { cards: number[] }>('cardsInfo', { cards: cardIds }),
             callAnkiConnect<Record<string, number>>('deckNamesAndIds'),
         ])
 
         const cardInfoByNoteId = new Map(
-            cardInfos.map(cardInfo => [cardInfo.note, cardInfo]),
+            cardInfos.map((cardInfo) => [cardInfo.note, cardInfo]),
         )
 
         return notes.flatMap((note) => {
             const cardInfo = cardInfoByNoteId.get(note.noteId)
-            const ankiDeckId = cardInfo
-                ? deckNamesAndIds[cardInfo.deckNAme]
-                : undefined
+            const ankiDeckId = cardInfo ? deckNamesAndIds[cardInfo.deckName] : undefined
+            const front = note.fields.Front?.value
+            const back = note.fields.Back?.value
+            const example = note.fields.Example?.value
+            const description = note.fields.Description?.value
 
-            if (!cardInfo || ankiDeckID == null) {
+            // A local card represents one Anki note in one deck. Notes from a
+            // different model, or models that generate multiple review cards,
+            // cannot be represented safely by this schema.
+            if (
+                note.cards.length !== 1
+                || !cardInfo
+                || ankiDeckId == null
+                || !front
+                || !back
+                || !example
+                || !description
+            ) {
                 return []
             }
 
             return [{
                 id: note.noteId,
                 ankiDeckId,
-                modlName: note.modelName,
-                front: note.fields.Front?.value ?? '',
-                image: mpte.fields.image?.value ?? '',
-                back: note.fields.Back?.value ?? '',
-                example: note.fields.Example?.value ?? '',
-                description: note.fields.Description?.value ?? '',
+                modelName: note.modelName,
+                front,
+                image: note.fields.Image?.value ?? '',
+                back,
+                example,
+                description,
                 tags: note.tags,
                 updatedAt: new Date(note.mod * 1000),
             }]
         })
     }
 }
-

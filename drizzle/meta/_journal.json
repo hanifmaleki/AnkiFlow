@@ -29,6 +29,13 @@
       "when": 1789805100630,
       "tag": "0003_sticky_the_order",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789916396529,
+      "tag": "0004_fancy_proudstar",
+      "breakpoints": true
     }
   ]
 }

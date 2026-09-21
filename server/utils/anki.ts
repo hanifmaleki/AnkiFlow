@@ -1,7 +1,18 @@
 const ANKI_CONNECT_URL = 'http://127.0.0.1:8765'
 const ANKI_CONNECT_VERSION = 5
 
-type AnkiConnectAction = 'version' | 'deckNames' | 'addNote' | 'findNotes' | 'deckNamesAndIds' | 'createDeck'
+type AnkiConnectAction =
+  | 'version'
+  | 'deckNames'
+  | 'addNote'
+  | 'findNotes'
+  | 'deckNamesAndIds'
+  | 'createDeck'
+  | 'notesInfo'
+  | 'cardsInfo'
+  | 'updateNoteFields'
+  | 'updateNoteTags'
+  | 'changeDeck'
 
 type AnkiConnectRequest<TParams> = {
   action: AnkiConnectAction
@@ -10,7 +21,7 @@ type AnkiConnectRequest<TParams> = {
 }
 
 type AnkiConnectResponse<TResult> = {
-  result: TResult | null
+  result: TResult
   error: string | null
 }
 
@@ -50,10 +61,6 @@ export async function callAnkiConnect<TResult, TParams = undefined>(
 
   if (data.error) {
     throw new Error(data.error)
-  }
-
-  if (data.result === null) {
-    throw new Error('AnkiConnect returned no result.')
   }
 
   return data.result
