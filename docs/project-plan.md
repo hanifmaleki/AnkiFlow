@@ -258,6 +258,29 @@ Only after the core flow works.
 - [ ] Save recent generated words.
 - [ ] Add a history page.
 - [ ] Add tags based on source or topic.
+
+---
+
+## Phase 12: Local Card Persistence and Synchronization
+
+Goal: keep AnkiFlow cards in Postgres and synchronize them with AnkiConnect.
+
+- [x] Add local `cards` storage with deck and prompt references.
+- [x] Add card CRUD in `CardService`.
+- [x] Define the Anki card gateway boundary and AnkiConnect implementation.
+- [x] Add local-first card synchronization with a single service entry point.
+- [ ] Create the custom Anki note model that generates one review card and
+  contains `Front`, `Image`, `Back`, `Example`, and `Description`.
+- [ ] Add a sync API route and one UI sync button.
+- [ ] Verify create, update, import, and local-wins conflict behaviour against
+  a real AnkiConnect instance.
+- [ ] Add automated tests using an `AnkiCardGateway` test double.
+
+## Definition of done
+
+- A local card can be created and edited in Postgres.
+- One user action synchronizes cards in the locally managed decks.
+- Unsupported Anki note models are skipped safely.
 - [ ] Add pronunciation or audio fields.
 - [ ] Add multiple card templates.
 - [ ] Add support for multiple languages.

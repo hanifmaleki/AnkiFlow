@@ -165,3 +165,55 @@ when a deck last changed. True last-change-wins sync needs both of those
 on the Anki side. Until then, local CRUD stays local, and `syncFromAnki`
 only creates missing remote decks, binds matching names, and copies
 remote-only decks into Postgres.
+
+## Card Synchronization
+
+Cards are local representations of Anki **notes**. The current note model must
+generate exactly one review card and provide these fields: `Front`, `Image`,
+`Back`, `Example`, and `Description`. `ankiModelName` identifies that model;
+the built-in Anki `Basic` model does not contain all of these fields and
+therefore cannot be used unchanged.
+
+`CardService` owns local CRUD and synchronization decisions. It has one public
+entry point for the eventual UI sync button:
+
+```ts
+await cardService.syncWithAnki(gateway)
+```
+
+`syncWithAnki()` first imports eligible Anki changes with `syncFromAnki()`, then
+pushes local changes with `syncToAnki()`. If both sides changed a card since the
+last successful sync, the local version wins and is pushed to Anki.
+
+Cards are imported only from decks that already exist locally. Deck
+synchronization must therefore run before card synchronization. Notes that do
+not contain the required AnkiFlow fields are skipped rather than inserted as
+incomplete local cards. No ownership tag is added or required.
+
+### `server/services/ankiGatewayService.ts`
+
+`AnkiCardGateway` isolates AnkiConnect request and response details from
+`CardService`.
+
+```ts
+export interface AnkiCardGateway {
+  list(deckNames: string[]): Promise<RemoteCard[]>
+  create(card: Card, deckName: string): Promise<RemoteCard>
+  update(noteId: number, card: Card, deckName: string): Promise<RemoteCard>
+}
+```
+
+- `RemoteCard` is the normalized data returned to `CardService`. It includes an
+  Anki note ID and deck ID so the local rows can be matched reliably.
+- `AnkiNoteInfo` is a private TypeScript type for AnkiConnect's `notesInfo`
+  response. It contains note-level fields, tags, modification time, and review
+  card IDs.
+- `AnkiCardInfo` is a private type for AnkiConnect's `cardsInfo` response. It
+  supplies the review card's deck name, which is not available from note data
+  alone.
+- `AnkiConnectCardGateway` maps between those raw AnkiConnect responses and
+  `RemoteCard`; it does not access Postgres.
+
+`CardService` stores `ankiNoteId` after a successful push and uses the unique
+index on that value to prevent more than one local card from binding to the
+same Anki note.

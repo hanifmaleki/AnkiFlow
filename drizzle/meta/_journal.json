@@ -15,6 +15,27 @@
       "when": 1788027089893,
       "tag": "0001_wise_wonder_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789752713436,
+      "tag": "0002_messy_squirrel_girl",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789805100630,
+      "tag": "0003_sticky_the_order",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789916396529,
+      "tag": "0004_fancy_proudstar",
+      "breakpoints": true
     }
   ]
 }

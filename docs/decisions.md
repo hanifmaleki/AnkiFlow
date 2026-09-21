@@ -29,6 +29,27 @@ This file records important technical and product choices.
 - Decision: Start with Postgres and a lightweight ORM, using a local development database first.
 - Reason: The app is heading toward structured persistence for versioned prompts, cards, and study data, and Postgres fits that path well while still supporting a future cloud deployment.
 
+### Card Synchronization Boundary
+
+- Decision: Keep AnkiConnect calls in gateway classes and keep synchronization
+  decisions in `CardService`.
+- Reason: The service can be tested without AnkiConnect, while the gateway owns
+  raw AnkiConnect action names and response shapes.
+
+### Sync Conflict Rule
+
+- Decision: Card synchronization is local-wins when both the local and remote
+  versions changed after the last sync.
+- Reason: Local edits are the edits made through AnkiFlow and can be pushed
+  deterministically after importing remote-only changes.
+
+### Card Import Scope
+
+- Decision: Import cards only from decks that are already stored locally; do
+  not require or add an ownership tag.
+- Reason: This avoids importing the full Anki collection without inventing a
+  tagging convention that the user did not request.
+
 ## Open Decisions
 
 - Initial target language
