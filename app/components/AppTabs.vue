@@ -5,7 +5,26 @@ const tabs = [
   { label: 'Cards', to: '/cards' },
   { label: 'Prompt', to: '/prompt' }
 ] as const
-const { status } = useAnkiConnection()
+const { ankiConnected, status, refreshAnkiConnection } = useAnkiConnection()
+const syncing = ref(false)
+
+const syncLabel = computed(() => {
+  if (syncing.value) return 'Syncing…'
+  return ankiConnected.value ? 'Sync' : 'No connection'
+})
+
+async function sync() {
+  if (!ankiConnected.value || syncing.value) return
+
+  syncing.value = true
+
+  try {
+    await $fetch('/api/sync', { method: 'POST' })
+  } finally {
+    syncing.value = false
+    await refreshAnkiConnection()
+  }
+}
 
 function isActive(to: string) {
   return route.path === to
@@ -25,7 +44,16 @@ function isActive(to: string) {
       </NuxtLink>
     </div>
 
-    <AnkiConnectionStatusBadge :status="status" />
+    <AppButton
+      variant="secondary"
+      class="sync-button"
+      :disabled="!ankiConnected || syncing"
+      :title="ankiConnected ? 'Synchronize with Anki' : 'AnkiConnect is unavailable'"
+      @click="sync"
+    >
+      <span class="tab-status" :class="`tab-status--${status}`" />
+      {{ syncLabel }}
+    </AppButton>
   </nav>
 </template>
 
@@ -45,6 +73,30 @@ function isActive(to: string) {
   display: flex;
   gap: 0.5rem;
   flex: 1;
+}
+
+.sync-button {
+  align-self: stretch;
+  border-radius: 999px;
+}
+
+.tab-status {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--color-text-soft);
+}
+
+.tab-status--connected {
+  background: var(--color-success);
+}
+
+.tab-status--disconnected {
+  background: var(--color-error);
+}
+
+.tab-status--checking {
+  background: var(--color-warning);
 }
 
 .tab {
