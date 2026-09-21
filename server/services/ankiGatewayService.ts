@@ -22,6 +22,11 @@ export type RemoteCard = {
     updatedAt: Date | null
 }
 
+export type RemoteCardList = {
+    cards: RemoteCard[]
+    skippedUnsupported: number
+}
+
 // Raw `notesInfo` data returned by AnkiConnect. It stays private to this file.
 type AnkiNoteInfo = {
     noteId: number
@@ -48,7 +53,7 @@ export interface AnkiDeckGateway {
 
 export interface AnkiCardGateway {
     // The caller controls which local deck names may be imported.
-    list(deckNames: string[]): Promise<RemoteCard[]>
+    list(deckNames: string[]): Promise<RemoteCardList>
     create(card: Card, deckName: string): Promise<RemoteCard>
     update(noteId: number, card: Card, deckName: string): Promise<RemoteCard>
 }
@@ -83,23 +88,29 @@ export class AnkiConnectDeckGateway implements AnkiDeckGateway {
 }
 
 export class AnkiConnectCardGateway implements AnkiCardGateway {
-    async list(deckNames: string[]): Promise<RemoteCard[]> {
+    async list(deckNames: string[]): Promise<RemoteCardList> {
         const uniqueDeckNames = [...new Set(deckNames)]
 
         if (uniqueDeckNames.length === 0) {
-            return []
+            return { cards: [], skippedUnsupported: 0 }
         }
 
-        const notesByDeck = await Promise.all(
-            uniqueDeckNames.map((deckName) => callAnkiConnect<AnkiNoteInfo[], { query: string }>(
-                'notesInfo',
+        const noteIdsByDeck = await Promise.all(
+            uniqueDeckNames.map((deckName) => callAnkiConnect<number[], { query: string }>(
+                'findNotes',
                 { query: `deck:"${deckName.replaceAll('"', '\\"')}"` },
             )),
         )
+        const noteIds = [...new Set(noteIdsByDeck.flat())]
 
-        const notes = [...new Map(
-            notesByDeck.flat().map((note) => [note.noteId, note]),
-        ).values()]
+        if (noteIds.length === 0) {
+            return { cards: [], skippedUnsupported: 0 }
+        }
+
+        const notes = await callAnkiConnect<AnkiNoteInfo[], { notes: number[] }>(
+            'notesInfo',
+            { notes: noteIds },
+        )
 
         return this.toRemoteCards(notes)
     }
@@ -185,7 +196,8 @@ export class AnkiConnectCardGateway implements AnkiCardGateway {
             })
         }
 
-        const [remoteCard] = await this.toRemoteCards([note])
+        const { cards } = await this.toRemoteCards([note])
+        const [remoteCard] = cards
 
         if (!remoteCard) {
             throw createError({
@@ -197,11 +209,11 @@ export class AnkiConnectCardGateway implements AnkiCardGateway {
         return remoteCard
     }
 
-    private async toRemoteCards(notes: AnkiNoteInfo[]): Promise<RemoteCard[]> {
+    private async toRemoteCards(notes: AnkiNoteInfo[]): Promise<RemoteCardList> {
         const cardIds = notes.flatMap((note) => note.cards)
 
         if (cardIds.length === 0) {
-            return []
+            return { cards: [], skippedUnsupported: notes.length }
         }
 
         const [cardInfos, deckNamesAndIds] = await Promise.all([
@@ -213,13 +225,14 @@ export class AnkiConnectCardGateway implements AnkiCardGateway {
             cardInfos.map((cardInfo) => [cardInfo.note, cardInfo]),
         )
 
-        return notes.flatMap((note) => {
+        let skippedUnsupported = 0
+        const cards = notes.flatMap((note) => {
             const cardInfo = cardInfoByNoteId.get(note.noteId)
             const ankiDeckId = cardInfo ? deckNamesAndIds[cardInfo.deckName] : undefined
             const front = note.fields.Front?.value
             const back = note.fields.Back?.value
-            const example = note.fields.Example?.value
-            const description = note.fields.Description?.value
+            const example = note.fields.Example?.value ?? ''
+            const description = note.fields.Description?.value ?? ''
 
             // A local card represents one Anki note in one deck. Notes from a
             // different model, or models that generate multiple review cards,
@@ -230,9 +243,8 @@ export class AnkiConnectCardGateway implements AnkiCardGateway {
                 || ankiDeckId == null
                 || !front
                 || !back
-                || !example
-                || !description
             ) {
+                skippedUnsupported += 1
                 return []
             }
 
@@ -249,5 +261,7 @@ export class AnkiConnectCardGateway implements AnkiCardGateway {
                 updatedAt: new Date(note.mod * 1000),
             }]
         })
+
+        return { cards, skippedUnsupported }
     }
 }

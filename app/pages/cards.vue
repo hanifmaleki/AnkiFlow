@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type {Deck} from '~~/server/db/entities/decks'
 
-const { data: decks, pendingDecks, decksApierror } = await useFetch<Deck[]>('api/decks')
+const { data: decks, pending: pendingDecks, error: decksApiError } = await useFetch<Deck[]>('/api/decks', {
+  key: 'decks'
+})
 </script>
 
 <template>
@@ -9,19 +11,19 @@ const { data: decks, pendingDecks, decksApierror } = await useFetch<Deck[]>('api
       <AppPanel title="Cards">
         <div class="cards-layout">
           <div class="decks-pane">
-            <div class="decks-header">decs-header</div>
-            <div class="deck-list">
+            <div class="decks-header">Decks</div>
+            <div class="decks-list">
                 <p v-if="pendingDecks">Loading decks...</p>
                 <p v-else-if="decksApiError">Could not load decks.</p>
 
-                <p v-for="deck in decks">
+                <p v-for="deck in decks ?? []" :key="deck.id">
                     {{ deck.name }}
                 </p>
             </div>
           </div>
 
           <div class="cards-pane">
-            <div class="cards-header">cards-header</div>
+            <div class="cards-header">Cards</div>
             <div class="card-list">card-list</div>
           </div>
 

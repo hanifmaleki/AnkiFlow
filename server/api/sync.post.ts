@@ -9,10 +9,10 @@ export default defineEventHandler(async () => {
 
     // Cards can only be matched to local decks after their Anki deck IDs have
     // been imported or created.
-    await new DeckService().syncFromAnki(deckGateway)
-    await new CardService().syncWithAnki(cardGateway)
+    const decks = await new DeckService().syncFromAnki(deckGateway)
+    const cards = await new CardService().syncWithAnki(cardGateway)
 
-    return { ok: true }
+    return { ok: true, stats: { decks, cards } }
   } catch (error) {
     throw createError({
       statusCode: 502,

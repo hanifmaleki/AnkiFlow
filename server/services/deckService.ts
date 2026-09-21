@@ -3,6 +3,13 @@ import { db } from '../db/client'
 import { decks, type Deck, DeckInput } from '../db/entities/decks'
 import { AnkiDeckGateway } from './ankiGatewayService'
 
+export type DeckSyncStats = {
+    importedFromAnki: number
+    createdInAnki: number
+    renamedFromAnki: number
+    linkedToAnki: number
+}
+
 function validateInputDeck(deck: DeckInput): string {
     const name = deck?.name?.trim()
     
@@ -79,10 +86,14 @@ export class DeckService {
         await db.delete(decks).where(eq(decks.id, deckId))
     }
 
-    async syncFromAnki(gateway: AnkiDeckGateway): Promise<Deck[]> {
+    async syncFromAnki(gateway: AnkiDeckGateway): Promise<DeckSyncStats> {
         const remoteDecks = await gateway.list()
         const localDecks = await this.listDecks()
         const syncedAt = now()
+        let importedFromAnki = 0
+        let createdInAnki = 0
+        let renamedFromAnki = 0
+        let linkedToAnki = 0
 
         const remoteById = new Map(remoteDecks.map((deck) => [deck.id, deck]))
         const remoteByName = new Map(remoteDecks.map((deck) => [deck.name, deck]))
@@ -99,6 +110,12 @@ export class DeckService {
                     name: local.name
                 })
 
+                if (existingRemote) {
+                    linkedToAnki += 1
+                } else {
+                    createdInAnki += 1
+                }
+
                 await db
                     .update(decks)
                     .set({
@@ -106,6 +123,8 @@ export class DeckService {
                         lastSyncedAt: syncedAt,
                     })
                     .where(eq(decks.id, local.id))
+
+                renamedFromAnki += 1
 
                 continue
             }
@@ -158,8 +177,9 @@ export class DeckService {
                 ankiDeckId: remote.id,
                 lastSyncedAt: syncedAt,
             })
+            importedFromAnki += 1
         }
 
-        return this.listDecks()
+        return { importedFromAnki, createdInAnki, renamedFromAnki, linkedToAnki }
     }
 }

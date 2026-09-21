@@ -7,6 +7,26 @@ const tabs = [
 ] as const
 const { ankiConnected, status, refreshAnkiConnection } = useAnkiConnection()
 const syncing = ref(false)
+type SyncResponse = {
+  ok: true
+  stats: {
+    decks: {
+      importedFromAnki: number
+      createdInAnki: number
+      renamedFromAnki: number
+      linkedToAnki: number
+    }
+    cards: {
+      importedFromAnki: number
+      updatedFromAnki: number
+      pushedToAnki: number
+      skippedUnsupported: number
+      skippedLocalChanges: number
+      skippedUnmappedDeck: number
+    }
+  }
+}
+const syncStats = ref<SyncResponse['stats'] | null>(null)
 
 const syncLabel = computed(() => {
   if (syncing.value) return 'Syncing…'
@@ -19,7 +39,9 @@ async function sync() {
   syncing.value = true
 
   try {
-    await $fetch('/api/sync', { method: 'POST' })
+    const response = await $fetch<SyncResponse>('/api/sync', { method: 'POST' })
+    syncStats.value = response.stats
+    await refreshNuxtData('decks')
   } finally {
     syncing.value = false
     await refreshAnkiConnection()
@@ -55,6 +77,8 @@ function isActive(to: string) {
       {{ syncLabel }}
     </AppButton>
   </nav>
+
+  <SyncSummaryDialog v-if="syncStats" :stats="syncStats" @close="syncStats = null" />
 </template>
 
 <style scoped lang="scss">
