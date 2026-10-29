@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import type {Deck} from '~~/server/db/entities/decks'
+import type {Card} from '~~/server/db/entities/cards'
 
 const { data: decks, pending: pendingDecks, error: decksApiError } = await useFetch<Deck[]>('/api/decks', {
   key: 'decks'
+})
+
+const { data: cards, pending: pendingCards, error: cardsApiError } = await useFetch<Card[]>('api/cards', {
+    key: 'cards'
 })
 </script>
 
@@ -11,10 +16,18 @@ const { data: decks, pending: pendingDecks, error: decksApiError } = await useFe
       <AppPanel title="Cards">
         <div class="cards-layout">
           <div class="decks-pane">
-            <div class="decks-header">Decks</div>
+            <div class="decks-header">
+                Decks
+            </div>
+
             <div class="decks-list">
-                <p v-if="pendingDecks">Loading decks...</p>
-                <p v-else-if="decksApiError">Could not load decks.</p>
+                <div v-if="pendingDecks">
+                    Loading decks...
+                </div>
+
+                <div v-else-if="decksApiError" class="fetch-error-container">
+                    Could not load decks.
+                </div>
 
                 <p v-for="deck in decks ?? []" :key="deck.id">
                     {{ deck.name }}
@@ -23,8 +36,26 @@ const { data: decks, pending: pendingDecks, error: decksApiError } = await useFe
           </div>
 
           <div class="cards-pane">
-            <div class="cards-header">Cards</div>
-            <div class="card-list">card-list</div>
+            <div class="cards-header">
+                Cards
+            </div>
+
+            <div class="cards-list-content-container">
+                <div v-if="pendingCards" class="peding-card-container">
+                    Loading cards... 
+                </div>
+
+                <div v-else-if="cardsApiError" class="fetch-error-container">
+                    Could not load cards {{cardsApiError}}.
+                </div>
+
+                <div v-else class="card-list-container">
+                    <div v-for="card in cards ?? []" class="card-title-container">
+                        {{ card.front }}
+                    </div>
+                </div>
+
+            </div>
           </div>
 
           <div class="card-detail-pane">
@@ -37,26 +68,27 @@ const { data: decks, pending: pendingDecks, error: decksApiError } = await useFe
 </template>
 
 <style scoped lang="scss">
-  .cards-layout {
+.cards-layout {
     display: grid;
     grid-template-columns: minmax(12rem, 14rem) minmax(16rem, 22rem) minmax(0, 1fr);
     gap: 1rem;
     min-height: 24rem;
     height: calc(100dvh - 14rem);
-  }
+}
 
 
 .decks-pane,
 .cards-pane,
 .card-detail-pane {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  min-height: 0;
-  min-width: 0;
-  border: 1px solid var(--color-border);
-  border-radius: 1.25rem;
-  background: var(--color-bg-elevated);
-  overflow: hidden;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
+    min-width: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 1.25rem;
+    background: var(--color-bg-elevated);
+    overflow: hidden;
+
 }
 .decks-header,
 .cards-header,
@@ -69,14 +101,26 @@ const { data: decks, pending: pendingDecks, error: decksApiError } = await useFe
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
+
 .decks-list,
-.cards-list,
+.cards-list-content-container,
 .card-detail-body {
   min-height: 0;
   overflow: auto;
   padding: 1rem;
   color: var(--color-text-muted);
 }
+
+.card-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.card-title-container {
+
+}
+
 @media (max-width: 900px) {
   .cards-layout {
     grid-template-columns: 1fr;
