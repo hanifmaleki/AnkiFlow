@@ -50,7 +50,7 @@ const { data: cards, pending: pendingCards, error: cardsApiError } = await useFe
                 </div>
 
                 <div v-else class="card-list-container">
-                    <div v-for="card in cards ?? []" class="card-title-container">
+                    <div v-for="card in cards ?? []" class="card-row">
                         {{ card.front }}
                     </div>
                 </div>
@@ -117,8 +117,24 @@ const { data: cards, pending: pendingCards, error: cardsApiError } = await useFe
     gap: 0.2rem;
 }
 
-.card-title-container {
+.card-row {
+    padding: 0.7rem 0.85rem;
+    font-weight: 600;
+    color: --color-text;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-radius: 0.9rem;
+    border: solid 1px var(--color-border-soft);
 
+    &:hover {
+        background: var(--color-bg-subtle);
+        border-color: var(--color-border);
+    }
+}
+
+.fetch-error-container {
+    color: var(--color-border);
 }
 
 @media (max-width: 900px) {
