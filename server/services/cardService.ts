@@ -12,8 +12,14 @@ function now(): Date {
 }
 
 export class CardService {
-    async listCards(): Promise<Card[]> {
-        return db.select().from(cards).orderBy(cards.createdAt)
+    async listCards(deckId?: number): Promise<Card[]> {
+        const query = db.select().from(cards).$dynamic()
+
+        if (deckId != null) {
+            query.where(eq(cards.deckId, deckId))
+        }
+
+        return query.orderBy(cards.createdAt)
     }
 
     async getCard(cardId: number): Promise<Card> {

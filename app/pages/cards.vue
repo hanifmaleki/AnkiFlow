@@ -6,9 +6,18 @@ const { data: decks, pending: pendingDecks, error: decksApiError } = await useFe
   key: 'decks'
 })
 
+const selectedDeck = ref<Deck | null>(null)
+
 const { data: cards, pending: pendingCards, error: cardsApiError } = await useFetch<Card[]>('api/cards', {
-    key: 'cards'
+    key: 'cards',
+    query: computed(() => selectedDeck.value ? 
+        { deckId: selectedDeck.value.id }
+        : {})
 })
+
+function selectDeck(deck: Deck) {
+    selectedDeck.value = deck
+}
 </script>
 
 <template>
@@ -29,9 +38,12 @@ const { data: cards, pending: pendingCards, error: cardsApiError } = await useFe
                     Could not load decks.
                 </div>
 
-                <p v-for="deck in decks ?? []" :key="deck.id">
-                    {{ deck.name }}
-                </p>
+                <div v-for="deck in decks ?? []" 
+                     class="deck-row"
+                     :key="deck.id"
+                     @click="selectDeck(deck)">
+                     {{ deck.name }}
+                </div>
             </div>
           </div>
 
@@ -105,18 +117,19 @@ const { data: cards, pending: pendingCards, error: cardsApiError } = await useFe
 .decks-list,
 .cards-list-content-container,
 .card-detail-body {
-  min-height: 0;
-  overflow: auto;
-  padding: 1rem;
-  color: var(--color-text-muted);
-}
-
-.card-list-container {
+    min-height: 0;
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
+    overflow: auto;
+    padding: 1rem;
+    color: var(--color-text-muted);
 }
 
+.card-list-container {
+}
+
+.deck-row,
 .card-row {
     padding: 0.7rem 0.85rem;
     font-weight: 600;
