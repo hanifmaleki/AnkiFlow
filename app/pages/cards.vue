@@ -69,9 +69,15 @@ function selectDeck(deck: Deck | null) {
                 </div>
 
                 <div v-else class="card-list-container">
-                    <div v-for="card in cards ?? []" class="card-row">
-                        {{ card.front }}
+                    <div v-if="cards.length === 0">
+                        No cards
                     </div>
+
+                    <template v-else>
+                        <div v-for="card in cards" class="card-row">
+                            {{ card.front }}
+                        </div>
+                    </template>
                 </div>
 
             </div>
@@ -140,7 +146,7 @@ function selectDeck(deck: Deck | null) {
 .card-row {
     padding: 0.7rem 0.85rem;
     font-weight: 600;
-    color: --color-text;
+    color: var(--color-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
