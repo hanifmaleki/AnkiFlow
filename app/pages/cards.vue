@@ -15,7 +15,7 @@ const { data: cards, pending: pendingCards, error: cardsApiError } = await useFe
         : {})
 })
 
-function selectDeck(deck: Deck) {
+function selectDeck(deck: Deck | null) {
     selectedDeck.value = deck
 }
 </script>
@@ -38,8 +38,15 @@ function selectDeck(deck: Deck) {
                     Could not load decks.
                 </div>
 
+                <div class="deck-row"
+                     :class="{ selected: selectedDeck === null }"
+                     @click="selectDeck(null)">
+                    All decks
+                </div>
+
                 <div v-for="deck in decks ?? []" 
                      class="deck-row"
+                     :class="{ selected: selectedDeck?.id === deck.id }"
                      :key="deck.id"
                      @click="selectDeck(deck)">
                      {{ deck.name }}
@@ -143,6 +150,12 @@ function selectDeck(deck: Deck) {
     &:hover {
         background: var(--color-bg-subtle);
         border-color: var(--color-border);
+    }
+
+    &.selected {
+        background: var(--color-bg-subtle);
+        border-color: var(--color-border);
+        color: var(--color-text);
     }
 }
 
